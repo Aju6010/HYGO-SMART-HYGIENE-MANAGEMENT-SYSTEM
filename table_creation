@@ -1,0 +1,37 @@
+create DATABASE HYGO;
+
+show tables in hygo;
+
+create table cleaning_log(
+    log_id int AUTO_INCREMENT PRIMARY KEY,
+    toilet_id int,
+    staff_id int,
+    assigned_time DATETIME,
+    cleaned_time DATETIME,
+    verification_status varchar(20),
+    attendance_status varchar(30)
+);
+
+create table toilet(
+    toilet_id int primary key,
+    location varchar(100),
+    status varchar(10),
+    last_cleaned_time DATETIME
+);
+
+create table sensor_data(
+    id int auto_increment primary key,
+    toilet_id int,
+    odour_level float,
+    usage_count int,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+create table staff(
+    staff_id int primary key,
+    name varchar(50),
+    score int DEFAULT 100,
+    status varchar(20)
+);
+
+show tables in hygo;
