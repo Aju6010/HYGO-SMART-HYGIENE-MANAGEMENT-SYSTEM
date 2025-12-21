@@ -1,5 +1,7 @@
 create DATABASE HYGO;
 
+use HYGO;
+
 show tables in hygo;
 
 create table cleaning_log(
