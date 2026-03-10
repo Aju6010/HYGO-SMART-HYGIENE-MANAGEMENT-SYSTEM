@@ -1,0 +1,118 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif, system-ui;
+}
+
+/* LOGIN PAGE ONLY */
+.login-page {
+    min-height: 100vh;
+    width: 100%;
+    background: #f8faff;   /* White background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* LOGIN CARD */
+.login-card {
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+/* LOGO */
+.logo-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.app-logo {
+    max-height: 250px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* TITLE */
+h1 {
+    font-size: 38px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: #718096;
+    margin-bottom: 32px;
+}
+
+/* INPUTS */
+input {
+    width: 100%;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    border: none;
+    border-radius: 10px;
+    background-color: #edf2f7;
+    font-size: 16px;
+    outline: none;
+}
+
+input:focus {
+    background-color: #e2e8f0;
+}
+
+/* OPTIONS (Forgot Password) */
+.options {
+    display: flex;
+    justify-content: flex-end;   /* better alignment for single link */
+    margin: 10px 0 30px 0;
+}
+
+/* If you still use <a> anywhere */
+.options a {
+    font-size: 14px;
+    text-decoration: none;
+    color: #4a5568;
+}
+
+.options a:hover {
+    text-decoration: underline;
+}
+
+/* Button version of forgot password */
+.link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 14px;
+    color: #4a5568;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}
+
+/* SIGN IN BUTTON */
+.btn {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2b7fff;
+    background: #eef4ff;
+    padding: 14px;
+    border-radius: 10px;
+    width: 100%;
+    border: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #2b7fff;
+    color: white;
+}
