@@ -1,0 +1,282 @@
+/* Sidebar & Layout */
+.hygo-dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f4f7fe;
+}
+
+.hygo-sidebar {
+    width: 250px;
+    background-color: #0b1120;
+    color: #94a3b8;
+    padding: 20px;
+}
+
+.sidebar-brand {
+    color: #22c55e;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 40px;
+}
+
+.sidebar-nav ul { list-style: none; padding: 0; }
+.sidebar-nav li {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: 0.3s;
+}
+
+.sidebar-nav li:hover, .sidebar-nav li.active {
+    background-color: #1e293b;
+    color: white;
+}
+
+/* Main Content Area */
+.hygo-main-content { flex: 1; padding: 30px; }
+.main-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+
+/* Profile Specific UI - Based on Hygo model stafflog.png */
+.profile-banner-top {
+    background-color: #6da5ff;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px 4px 0 0;
+}
+
+.profile-card {
+    background: white;
+    padding: 40px;
+    border: 1px solid #e2e8f0;
+}
+
+.user-identity-centered {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.image-circle img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #e2e8f0;
+}
+
+.user-label-blue {
+    background-color: #3b82f6;
+    color: white;
+    display: inline-block;
+    padding: 5px 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.details-accordion { border-top: 2px solid #2dd4bf; padding-top: 10px; }
+.details-title { font-weight: bold; color: #475569; margin-bottom: 20px; }
+
+.details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+
+.data-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+.label {
+    background-color: #eff6ff;
+    color: #3b82f6;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-right: 15px;
+    min-width: 100px;
+    text-align: center;
+}
+/* Dashboard Card Styling */
+.dashboard-stats-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+}
+
+.dashboard-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.score-circle-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ring-fill {
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset 1s ease-in-out;
+}
+
+.score-inner-text {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.score-val {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.score-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+}
+
+
+
+
+/* Centering and Layout */
+.dashboard-stats-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 20px;
+}
+
+.dashboard-welcome-banner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    line-height: 1.4;
+    background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+    padding: 40px;
+    border-radius: 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 40px rgba(43, 127, 255, 0.08);
+    border: 1px solid #eef2ff;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Gauge Typography */
+.trust-gauge-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    margin-top: 10px;
+}
+
+.gauge-overlay {
+    position: absolute;
+    bottom: 0px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gauge-score {
+    font-size: 2.5rem; /* Big centerpiece font */
+    font-weight: 900;
+    color: #1e293b;
+    line-height: -1;
+    letter-spacing: -2px;
+    text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+   
+}
+
+.gauge-text {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-top: -5px;
+}
+
+@keyframes countPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    80% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Stat Cards */
+.quick-stats-simple {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.simple-stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    min-width: 180px;
+    text-align: center;
+    border-bottom: 4px solid #2b7fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+/* logout */
+/* Header alignment to allow button on the right */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Logout Button Styling */
+.logout-btn {
+    background-color: #fee2e2; /* Light red background */
+    color: #ef4444;           /* Strong red text */
+    border: 1px solid #fecaca;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #ef4444; /* Flips to solid red on hover */
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    transform: translateY(-2px);
+}
+
+.logout-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}

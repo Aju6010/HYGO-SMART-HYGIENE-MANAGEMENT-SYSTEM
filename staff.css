@@ -1,0 +1,154 @@
+.staff-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  padding: 0 30px;
+}
+
+.summary-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.summary-card.active {
+  background: #ecfdf5;
+}
+
+.summary-card h2 {
+  margin: 6px 0 0;
+  font-size: 28px;
+}
+
+.summary-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-icon.green {
+  background: #22c55e;
+  color: white;
+}
+
+.summary-icon.gray {
+  background: #f1f5f9;
+}
+
+/* CONTROLS */
+.staff-controls {
+  display: flex;
+  gap: 16px;
+  padding: 30px;
+}
+
+.staff-controls input,
+.staff-controls select {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  width: 100%;
+}
+
+.staff-controls select {
+  max-width: 200px;
+}
+
+/* STAFF GRID */
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  padding: 0 30px 40px;
+}
+
+.staff-card {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.staff-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #34d399, #10b981);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.staff-actions {
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.staff-id {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.staff-info {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.staff-tags {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+}
+
+.tag {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.tag.on {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.tag.off {
+  background: #e5e7eb;
+  color: #475569;
+}
+
+.tag.role {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.tag.supervisor {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.add-btn {
+  background: #059669;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}

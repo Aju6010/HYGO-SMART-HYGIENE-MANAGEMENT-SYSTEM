@@ -1,0 +1,358 @@
+ 
+/* BODY */
+html,body {
+  
+  height: auto;
+  overflow-y: auto;
+
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.up {
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+/*SIDE BUTTONS*/
+/* SIDEBAR CONTAINER */
+.side {
+  height: 100vh;
+  width: 16%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: #0b1220; /* Darker navy/black background */
+  padding: 30px 15px; /* Added horizontal padding for the pill effect */
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Tighter gap between menu items */
+}
+
+/* SIDEBAR LOGO (HYGO) */
+.side_header {
+  padding: 0px 15px 30px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Aligned to left like the image */
+}
+
+.up {
+  color: #16a34a; /* Vibrant Green from your screenshot */
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* NAVIGATION BUTTONS */
+.nav-btn {
+  padding: 12px 20px;
+  color: #94a3b8; /* Dimmed text for inactive state */
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px; /* Rounded corners for the hover/active state */
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ACTIVE STATE (Matches the Dashboard button in your screenshot) */
+.nav-btn.active {
+  color: #ffffff;
+  background: #1e293b; /* Grayish-blue highlight box */
+  font-weight: 00;
+  /* Removed border-left to match the "pill" style in the image */
+  border-left: none; 
+}
+
+/* MAIN CONTENT ADJUSTMENT */
+.main {
+    margin-left: 16%;
+    min-height: 100vh;
+    background: #F3F7FA;
+    display: flex;
+    flex-direction: column;
+}
+
+.side_header {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+
+.main {
+    margin-left: 15%;
+    min-height: 100vh;   /* ✅ allows unlimited scrolling */
+    background: #F3F7FA;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 40px;
+}
+
+
+/* DASHBOARD CARDS */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  padding: 30px;
+}
+
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 24px;
+  border-radius: 18px;
+  position: relative;
+
+  box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+}
+
+/* CARD CONTENT */
+.card-title {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+}
+
+.card h2 {
+  margin: 6px 0;
+  font-size: 34px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.card-sub {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.card-sub.danger {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.up {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+/* ICON CIRCLE */
+.card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  color: #fff;
+}
+
+/* CARD BACKGROUNDS */
+.card-blue {
+  background: #eef5ff;
+}
+.card-green {
+  background: #ecfdf5;
+}
+.card-red {
+  background: #fff1f2;
+}
+.card-yellow {
+  background: #fff7ed;
+}
+
+/* ICON COLORS */
+.card-icon.blue {
+  background: #3b82f6;
+}
+.card-icon.green {
+  background: #22c55e;
+}
+.card-icon.red {
+  background: #ef4444;
+}
+.card-icon.yellow {
+  background: #f59e0b;
+}
+
+
+
+
+.section {
+    margin-top: 40px;
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.section h3 {
+    margin-bottom: 20px;
+    color: #0F2027;
+}
+
+.chart{
+    width: 60%;          
+    max-width: 500px;
+
+    background: white;
+    padding: 20px;
+
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.chart canvas {
+    height: 250px !important;
+}
+
+/* ALERTS PANEL */
+.alerts-section {
+  margin: 30px;
+}
+
+.alerts-section h3 {
+  margin-bottom: 15px;
+  color: #0f2027;
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alert-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #ffffff;
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.alert-left p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.alert-right {
+  font-size: 13px;
+  color: #777;
+}
+
+/* STATUS COLORS */
+.alert-card.critical {
+  border-left: 6px solid #ff4d4d;
+}
+
+.alert-card.warning {
+  border-left: 6px solid #ffa500;
+}
+
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin: 20px 30px 10px;
+}
+
+
+.dash-title h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.dash-title p {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #64748b;
+}
+
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 16px;
+  border-radius: 10px;
+
+  background: #ffffff;
+  border: 1px solid #86efac;
+
+  color: #16a34a;
+  font-weight: 500;
+  font-size: 14px;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background: #ecfdf5;
+}
+
+.charts-row {
+  display: flex;
+  gap: 30px;
+  align-items: stretch;   
+}
+
+.chart {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+.chart.bar-chart {
+  flex: 2;    /* takes more space */
+}
+.chart.pie-chart {
+  flex: 1;    /* takes remaining space */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
