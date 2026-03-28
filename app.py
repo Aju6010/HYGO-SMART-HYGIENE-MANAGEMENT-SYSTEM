@@ -180,23 +180,42 @@ def cleaning_alerts():
 # --------------------
 # Staff API
 # --------------------
-@app.route("/api/staff")
+@app.route("/api/staff", methods=["GET", "POST"])
 def get_staff():
 
     db, cursor = get_cursor()
 
-    cursor.execute("""
-        SELECT 
-            staff_id,
-            name,
-            status,
-            score
-        FROM staff
-    """)
+    # ✅ GET → fetch staff
+    if request.method == "GET":
+        cursor.execute("""
+            SELECT 
+                staff_id,
+                name,
+                status,
+                score
+            FROM staff
+        """)
 
-    staff = cursor.fetchall()
+        staff = cursor.fetchall()
+        return jsonify(staff)
 
-    return jsonify(staff)
+    # ✅ POST → add staff
+    if request.method == "POST":
+        data = request.json
+
+        name = data.get("name")
+        status = data.get("status", "Active")   # default
+        score = data.get("score", 0)
+
+        query = """
+        INSERT INTO staff (name, status, score)
+        VALUES (%s, %s, %s)
+        """
+
+        cursor.execute(query, (name, status, score))
+        db.commit()
+
+        return jsonify({"message": "Staff added successfully"})
 
 
 # --------------------
