@@ -1,4 +1,3 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
 import Intro from "./pages/Intro";
@@ -12,7 +11,7 @@ import StaffDashboard from "./pages/StaffDashboard";
 
 function App() {
   return (
-    <Router>
+    
       <Routes>
         <Route path="/" element={<Intro />} />
         <Route path="/roles" element={<RoleSelect />} />
@@ -24,7 +23,7 @@ function App() {
         <Route path="/reports" element={<Reports />} />
         <Route path="/staff-dashboard" element={<StaffDashboard />} />
       </Routes>
-    </Router>
+    
   );
 }
 
