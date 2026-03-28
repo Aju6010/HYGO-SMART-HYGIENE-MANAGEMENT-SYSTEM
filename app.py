@@ -633,9 +633,6 @@ def predict_from_db():
     return jsonify(results)
 
 
-# --------------------
-# ESP32 DATA API  
-# --------------------
 @app.route("/api/data", methods=["POST"])
 def receive_sensor_data():
 
