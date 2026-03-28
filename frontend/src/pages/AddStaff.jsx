@@ -2,8 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AddStaff() {
+    return (
+        <div>
+            <h2>Add Staff</h2>
+        </div>
+    );  
+} 
 
-  const [name, setName] = useState("");
+ /* const [name, setName] = useState("");
   const [status, setStatus] = useState("on");
   const [score, setScore] = useState(80);
 
@@ -55,4 +61,4 @@ export default function AddStaff() {
       </form>
     </div>
   );
-}
+}*/
