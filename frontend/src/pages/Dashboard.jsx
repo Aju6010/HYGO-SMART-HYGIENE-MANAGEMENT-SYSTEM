@@ -4,11 +4,6 @@ import Sidebar from "../component/Sidebar";
 import "../styles/dash.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-const navigate = useNavigate();
-
-<button onClick={() => navigate("/add-staff")}>
-  Add Staff Member
-</button>
 
 function Dashboard() {
   const [alerts, setAlerts] = useState([]);
@@ -95,9 +90,7 @@ const pieData = {
 };
 const navigate = useNavigate();
 
-<button onClick={() => navigate("/add-staff")}>
-  Add Staff Member
-</button>
+
 
   return (
     <div className="app">
@@ -110,7 +103,11 @@ const navigate = useNavigate();
             <h1>Dashboard</h1>
             <p>Monitor and manage hygiene across all facilities</p>
           </div>
-
+          <div>
+          <button onClick={() => navigate("/add-staff")}>
+               Add Staff Member
+          </button>
+          </div>
           <button className="refresh-btn"
           onClick={fetchData}>
             ⟳ Refresh Data
