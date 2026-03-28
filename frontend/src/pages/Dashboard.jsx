@@ -31,27 +31,27 @@ function Dashboard() {
 
 
 }, []);
-  const total = toilets.length;
-  const dirty = alerts.length;
-  const clean = total - dirty;
-  // ===== DYNAMIC DATA =====
+const total = toilets.length;
+const dirty = alerts.length;
+const clean = total - dirty;
+
+// ===== DYNAMIC DATA =====
 
 // Labels
-const labels = toiletData.map(t => "T" + t.toilet_id);
+const labels = toilets.map(t => `T${t.toilet_id}`);
 
-// Usage (you already have predicted_minutes)
-const usageData = toiletData.map(t => t.predicted_minutes);
+// Data
+const usageData = toilets.map(t => t.predicted_minutes || 0);
 
-// Cleanliness score (convert status → number)
-const cleanlinessData = toiletData.map(t => {
+const cleanlinessData = toilets.map(t => {
   if (t.status === "Clean") return 90;
   if (t.status === "Moderate") return 60;
   return 30;
 });
-console.log("toiletData:", toiletData);
-// BAR CHART DATA
+
+// ✅ ONLY ONE data object
 const data = {
-  labels: labels,
+  labels,
   datasets: [
     {
       label: "Usage Count",
@@ -66,19 +66,20 @@ const data = {
   ],
 };
 
-// PIE CHART CALCULATION
-const cleanCount = toiletData.filter(t => t.status === "Clean").length;
-const moderateCount = toiletData.filter(t => t.status === "Moderate").length;
-const dirtyCount = toiletData.filter(t => t.status === "Dirty").length;
+// ✅ Correct console log
+console.log("API DATA:", toilets);
 
-// PIE CHART DATA
+// ===== PIE CHART =====
+const cleanCount = toilets.filter(t => t.status === "Clean").length;
+const moderateCount = toilets.filter(t => t.status === "Moderate").length;
+const dirtyCount = toilets.filter(t => t.status === "Dirty").length;
+
 const pieData = {
   labels: ["Clean", "Moderate", "Dirty"],
   datasets: [
     {
       data: [cleanCount, moderateCount, dirtyCount],
       backgroundColor: ["#38bdf8", "#facc15", "#f87171"],
-      borderWidth: 0,
     },
   ],
 };
