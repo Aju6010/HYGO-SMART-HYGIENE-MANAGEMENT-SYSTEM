@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Intro from "./pages/Intro";
 import RoleSelect from "./pages/RoleSelect";
@@ -8,7 +8,7 @@ import ToiletStatus from "./pages/ToiletStatus";
 import AlertsFeedback from "./pages/AlertsFeedback";
 import Reports from "./pages/Reports";
 import StaffDashboard from "./pages/StaffDashboard";
-import AddStaff from "./pages/AddStaff";
+import AddStaff from "./pages/AddStaff";s
 
 function App() {
   return (
