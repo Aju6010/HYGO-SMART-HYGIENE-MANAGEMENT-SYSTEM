@@ -93,6 +93,11 @@ const pieData = {
     },
   ],
 };
+const navigate = useNavigate();
+
+<button onClick={() => navigate("/add-staff")}>
+  Add Staff Member
+</button>
 
   return (
     <div className="app">
