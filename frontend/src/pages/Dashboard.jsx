@@ -11,7 +11,7 @@ function Dashboard() {
   const [toiletData, setToiletData] = useState([]); 
 ;
 
- const fetchData = ()=> { 
+ const fetchData = ( ) => { 
      console.log("REFRESH CLICKED");  
   // Alerts
   fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/cleaning-alerts")
