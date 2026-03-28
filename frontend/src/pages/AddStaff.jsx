@@ -22,7 +22,6 @@ export default function AddStaff() {
     })
       .then(res => res.json())
       .then(() => navigate("/staff"));
-  };
 
   return (
     <div style={{ padding: "30px" }}>
