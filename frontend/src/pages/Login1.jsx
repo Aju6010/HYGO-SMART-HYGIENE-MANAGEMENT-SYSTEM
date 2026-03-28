@@ -28,6 +28,7 @@ try {
       password: password
     })
   });
+  console.log("updated");
 
   const data = await res.json();
 
