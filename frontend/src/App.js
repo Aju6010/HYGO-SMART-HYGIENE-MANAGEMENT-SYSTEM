@@ -1,4 +1,4 @@
-
+import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Intro from "./pages/Intro";
 import RoleSelect from "./pages/RoleSelect";
