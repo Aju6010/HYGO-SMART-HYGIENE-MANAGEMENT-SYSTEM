@@ -48,7 +48,7 @@ const cleanlinessData = toiletData.map(t => {
   if (t.status === "Moderate") return 60;
   return 30;
 });
-
+console.log("toiletData:", toiletData);
 // BAR CHART DATA
 const data = {
   labels: labels,
