@@ -38,12 +38,12 @@ const clean = total - dirty;
 // ===== DYNAMIC DATA =====
 
 // Labels
-const labels = toilets.map(t => `T${t.toilet_id}`);
+const labels = predictions.map(t => `T${t.toilet_id}`);
 
 // Data
-const usageData = toilets.map(t => t.predicted_minutes || 0);
+const usageData = predictions.map(t => t.predicted_minutes || 0);
 
-const cleanlinessData = toilets.map(t => {
+const cleanlinessData = predictions.map(t => {
   if (t.status === "Clean") return 90;
   if (t.status === "Moderate") return 60;
   return 30;
