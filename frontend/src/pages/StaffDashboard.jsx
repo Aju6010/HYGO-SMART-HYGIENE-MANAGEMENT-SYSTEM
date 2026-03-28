@@ -41,7 +41,7 @@ const StaffDashboard = () => {
 
     try {
 
-      const res = await fetch("http://127.0.0.1:5000/api/report/summary");
+      const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/report/summary");
 
       if (!res.ok) {
         throw new Error("API error");
@@ -74,7 +74,7 @@ const StaffDashboard = () => {
 
   const staffId = localStorage.getItem("staff_id");
 
-  fetch(`http://127.0.0.1:5000/api/staff/profile/${staffId}`)
+  fetch(`https://hygo-smart-hygiene-management-system.onrender.com/api/staff/profile/${staffId}`)
     .then(res => res.json())
     .then(data => {
       if (data && data.name) {

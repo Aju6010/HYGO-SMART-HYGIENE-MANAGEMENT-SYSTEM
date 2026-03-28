@@ -16,8 +16,8 @@ const DashboardCards = () => {
 
       try {
 
-        const toiletsRes = await fetch("http://127.0.0.1:5000/api/toilets");
-        const alertsRes = await fetch("http://127.0.0.1:5000/api/alerts");
+        const toiletsRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets");
+        const alertsRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/alerts");
 
         if (!toiletsRes.ok || !alertsRes.ok) {
           throw new Error("API error");

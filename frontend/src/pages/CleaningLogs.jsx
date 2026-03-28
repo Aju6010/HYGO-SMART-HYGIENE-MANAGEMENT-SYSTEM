@@ -8,7 +8,7 @@ const CleaningLogs = () => {
 
   const fetchLogs = () => {
 
-    fetch("http://127.0.0.1:5000/api/report/logs")
+    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/report/logs")
       .then(res => res.json())
       .then(data => {
 

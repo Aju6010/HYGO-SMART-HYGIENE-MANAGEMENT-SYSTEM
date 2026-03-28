@@ -17,11 +17,11 @@ export default function AlertsFeedback() {
     const loadData = async () => {
       try {
 
-        const alertRes = await fetch("http://127.0.0.1:5000/api/alerts");
+        const alertRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/alerts");
         const alertData = await alertRes.json();
         setAlerts(alertData || []);
 
-        const feedbackRes = await fetch("http://127.0.0.1:5000/api/feedback");
+        const feedbackRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/feedback");
         const feedbackData = await feedbackRes.json();
         setFeedback(feedbackData || []);
 

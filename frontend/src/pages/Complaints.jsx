@@ -11,7 +11,7 @@ const Complaints = () => {
 
   const fetchComplaints = () => {
 
-    fetch("http://127.0.0.1:5000/api/complaints")
+    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/complaints")
       .then(res => res.json())
       .then(data => {
         setRecentComplaints(data);
@@ -46,7 +46,7 @@ const Complaints = () => {
     }
 
     const staffId = localStorage.getItem("staff_id");
-    fetch("http://127.0.0.1:5000/api/complaints", {
+    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/complaints", {
 
       method: "POST",
 

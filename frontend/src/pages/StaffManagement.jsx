@@ -7,7 +7,7 @@ export default function StaffManagement() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/staff")
+    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff")
       .then((res) => res.json())
       .then((data) => setStaff(data))
       .catch((err) => console.error("Error fetching staff:", err));

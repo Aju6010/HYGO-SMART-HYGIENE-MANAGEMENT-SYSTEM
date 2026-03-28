@@ -35,27 +35,27 @@ async function loadReports() {
   try {
 
     // DAILY CLEANINGS
-    const cleanings = await fetch("http://127.0.0.1:5000/api/report/cleanings");
+    const cleanings = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/report/cleanings");
     const cleaningsData = await cleanings.json();
     setCleaningData(cleaningsData || []);
 
     // PIE DATA
-    const types = await fetch("http://127.0.0.1:5000/api/report/types");
+    const types = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/report/types");
     const typesData = await types.json();
     setPieData(typesData || []);
 
     // TOP STAFF
-    const staff = await fetch("http://127.0.0.1:5000/api/report/top-staff");
+    const staff = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/report/top-staff");
     const staffData = await staff.json();
     setPerformers(staffData || []);
 
     // RECENT LOGS
-    const logsRes = await fetch("http://127.0.0.1:5000/api/report/logs");
+    const logsRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/report/logs");
     const logsData = await logsRes.json();
     setLogs(logsData || []);
 
     // SUMMARY
-    const summaryRes = await fetch("http://127.0.0.1:5000/api/report/summary");
+    const summaryRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/report/summary");
     const summaryData = await summaryRes.json();
 
     setSummary({

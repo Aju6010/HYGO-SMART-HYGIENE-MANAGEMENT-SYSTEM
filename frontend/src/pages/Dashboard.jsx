@@ -13,17 +13,17 @@ function Dashboard() {
   useEffect(() => {
 
   // Alerts
-  fetch("http://127.0.0.1:5000/api/cleaning-alerts")
+  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/cleaning-alerts")
     .then(res => res.json())
     .then(data => setAlerts(data));
 
   // Toilets
-  fetch("http://127.0.0.1:5000/api/toilets")
+  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets")
     .then(res => res.json())
     .then(data => setToilets(data));
 
     //  (AI prediction)
-  fetch("http://127.0.0.1:5000/api/predict-from-db")
+  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/predict-from-db")
     .then(res => res.json())
     .then(data => setPredictions(data))
     .catch(err => console.log("Prediction error:", err));
