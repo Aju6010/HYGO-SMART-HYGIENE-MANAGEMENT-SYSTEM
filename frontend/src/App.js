@@ -1,7 +1,7 @@
 import { HashRouter as Routes, Route, Router } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Intro from "./pages/Intro";
-import RoleSelect from "./pages/roleselect";
+import RoleSelect from "./pages/RoleSelect";
 import Login from "./pages/Login1";
 import StaffManagement from "./pages/StaffManagement";
 import ToiletStatus from "./pages/ToiletStatus";
