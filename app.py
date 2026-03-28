@@ -180,44 +180,68 @@ def cleaning_alerts():
 # --------------------
 # Staff API
 # --------------------
+
 @app.route("/api/staff", methods=["GET", "POST"])
-def get_staff():
+def staff():
 
     db, cursor = get_cursor()
 
-    # ✅ GET → fetch staff
+    # =========================
+    # ✅ GET → FETCH STAFF
+    # =========================
     if request.method == "GET":
-        cursor.execute("""
-            SELECT 
-                staff_id,
-                name,
-                status,
-                score
-            FROM staff
-        """)
+        try:
+            cursor.execute("""
+                SELECT 
+                    staff_id,
+                    name,
+                    status,
+                    score
+                FROM staff
+                ORDER BY staff_id DESC
+            """)
 
-        staff = cursor.fetchall()
-        return jsonify(staff)
+            staff = cursor.fetchall()
 
-    # ✅ POST → add staff
+            return jsonify(staff), 200
+
+        except Exception as e:
+            print("GET ERROR:", e)
+            return jsonify({"error": str(e)}), 500
+
+    # =========================
+    # ✅ POST → ADD STAFF
+    # =========================
     if request.method == "POST":
-        data = request.json
+        try:
+            data = request.get_json()
 
-        name = data.get("name")
-        status = data.get("status", "Active")   # default
-        score = data.get("score", 0)
+            name = data.get("name")
+            status = data.get("status", "on")   # ✅ use "on/off"
+            score = data.get("score", 0)
 
-        query = """
-        INSERT INTO staff (name, status, score)
-        VALUES (%s, %s, %s)
-        """
+            # ⚠️ validation
+            if not name:
+                return jsonify({"error": "Name is required"}), 400
 
-        cursor.execute(query, (name, status, score))
-        db.commit()
+            query = """
+            INSERT INTO staff (name, status, score)
+            VALUES (%s, %s, %s)
+            """
 
-        return jsonify({"message": "Staff added successfully"})
+            cursor.execute(query, (name, status, score))
+            db.commit()
 
+            return jsonify({
+                "message": "Staff added successfully",
+                "name": name,
+                "status": status,
+                "score": score
+            }), 201
 
+        except Exception as e:
+            print("POST ERROR:", e)
+            return jsonify({"error": str(e)}), 500
 # --------------------
 # Toilets API
 # --------------------

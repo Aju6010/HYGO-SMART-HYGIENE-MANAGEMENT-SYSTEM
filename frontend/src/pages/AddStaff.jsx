@@ -1,53 +1,65 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function AddStaff() {
+export default function AddStaff() {
   const [name, setName] = useState("");
+  const [status, setStatus] = useState("on");
+  const [score, setScore] = useState(80);
 
-  const handleSubmit = async () => {
-    try {
-      const res = await fetch(
-        "https://hygo-smart-hygiene-management-system.onrender.com/api/staff",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: name,
-            status: "Active",
-            score: 0,
-          }),
-        }
-      );
+  const navigate = useNavigate();
 
-      const data = await res.json();
-      alert("Staff Added ✅");
-      console.log(data);
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    } catch (err) {
-      console.log(err);
-      alert("Error adding staff ❌");
-    }
+    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/add-staff", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, status, score }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+
+        // ✅ Go back to staff page
+        navigate("/staff");
+      })
+      .catch((err) => console.error("Error:", err));
   };
 
   return (
     <div style={{ padding: "30px" }}>
       <h2>Add Staff Member</h2>
 
-      <input
-        type="text"
-        placeholder="Enter name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+      <form onSubmit={handleSubmit}>
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
 
-      <br /><br />
+        <br /><br />
 
-      <button onClick={handleSubmit}>
-        Add Staff
-      </button>
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="on">On Duty</option>
+          <option value="off">Off Duty</option>
+        </select>
+
+        <br /><br />
+
+        <input
+          type="number"
+          placeholder="Score"
+          value={score}
+          onChange={(e) => setScore(e.target.value)}
+        />
+
+        <br /><br />
+
+        <button type="submit">Add Staff</button>
+      </form>
     </div>
   );
 }
-
-export default AddStaff;
