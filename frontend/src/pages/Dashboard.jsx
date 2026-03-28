@@ -70,9 +70,9 @@ const data = {
 console.log("API DATA:", toilets);
 
 // ===== PIE CHART =====
-const cleanCount = toilets.filter(t => t.status === "Clean").length;
-const moderateCount = toilets.filter(t => t.status === "Moderate").length;
-const dirtyCount = toilets.filter(t => t.status === "Dirty").length;
+const cleanCount = predictions.filter(t => t.status === "Clean").length;
+const moderateCount = predictions.filter(t => t.status === "Moderate").length;
+const dirtyCount = predictions.filter(t => t.status === "Dirty").length;
 
 const pieData = {
   labels: ["Clean", "Moderate", "Dirty"],

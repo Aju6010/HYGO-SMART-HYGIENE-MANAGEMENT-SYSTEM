@@ -631,5 +631,41 @@ def predict_from_db():
         })
 
     return jsonify(results)
+
+
+# --------------------
+# ESP32 DATA API  
+# --------------------
+@app.route("/api/data", methods=["POST"])
+def receive_sensor_data():
+
+    data = request.json
+
+    gas_status = data.get("gas_status")
+    gas_value = data.get("gas_value")
+    distance = data.get("distance")
+    status = data.get("status")
+    count = data.get("count")
+    alert = data.get("alert")
+
+    print("📡 ESP32 DATA:", data)
+
+    # 🔥 Convert gas to odour level (scale 0–10)
+    odour_level = round(gas_value / 100, 2)
+
+    # 🔥 Insert into DB
+    db, cursor = get_cursor()
+
+    query = """
+    INSERT INTO sensor_data (toilet_id, odour_level, usage_count, timestamp)
+    VALUES (%s, %s, %s, NOW())
+    """
+
+    cursor.execute(query, (1, odour_level, count))  # toilet_id = 1 for now
+
+    db.commit()
+
+    return jsonify({"message": "Data stored successfully"})
+
 if __name__ == "__main__":
     app.run(debug=True)
