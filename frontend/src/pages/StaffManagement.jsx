@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ ADD THIS
 import Sidebar from "../component/Sidebar";
 import "../styles/staff.css";
 
@@ -6,6 +7,7 @@ export default function StaffManagement() {
   const [staff, setStaff] = useState([]);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff")
@@ -14,21 +16,22 @@ export default function StaffManagement() {
       .catch((err) => console.error("Error fetching staff:", err));
   }, []);
 
-  // SUMMARY COUNTS
+  // ✅ SUMMARY COUNTS (correct)
   const totalStaff = staff.length;
   const onDuty = staff.filter((s) => s.status === "on").length;
   const offDuty = staff.filter((s) => s.status === "off").length;
 
-  // FILTERED STAFF
-  const filteredStaff = staff.filter (s => 
-    s.name.toLowerCase().includes(search.toLowerCase()) || 
-    String(s.id).includes(search)
-  );
-      {filteredStaff.map((s) => (
-       <div key={s.id}>
-          <p>{s.name}  -  {s.role}</p>
-       </div>
-      ))}
+  // ✅ COMBINED FILTER (search + dropdown)
+  const filteredStaff = staff.filter((s) => {
+    const matchesSearch =
+      s.name.toLowerCase().includes(search.toLowerCase()) ||
+      String(s.staff_id).includes(search);
+
+    const matchesFilter =
+      filter === "all" || s.status === filter;
+
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <div className="app">
@@ -41,22 +44,13 @@ export default function StaffManagement() {
             <h1>Staff Management</h1>
             <p>Manage cleaning staff and assignments</p>
           </div>
-          <button className="add-btn">＋ Add Staff Member</button>
+          <button
+            onClick={() => navigate("/add-staff")}
+            className="add-btn"
+          >
+            ＋ Add Staff Member
+          </button>
         </div>
-        {/* 🔍 SEARCH BAR HERE */}
-      <div style={{ margin: "15px 0" }}>
-      <input
-        type="text"
-         placeholder="Search by name or ID"
-         onChange={(e) => setSearch(e.target.value)}
-         style={{
-               padding: "10px",
-               width: "250px",
-              borderRadius: "8px",
-              border: "1px solid #ccc"
-                }}
-         />
-       </div>
 
         {/* SUMMARY CARDS */}
         <div className="staff-summary">
@@ -87,8 +81,16 @@ export default function StaffManagement() {
 
         {/* CONTROLS */}
         <div className="staff-controls">
-          <input placeholder="Search by name or ID..." disabled />
-          <select onChange={(e) => setFilter(e.target.value)}>
+          <input
+            placeholder="Search by name or ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)} // ✅ FIXED
+          />
+
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)} // ✅ FIXED
+          >
             <option value="all">All Status</option>
             <option value="on">On Duty</option>
             <option value="off">Off Duty</option>

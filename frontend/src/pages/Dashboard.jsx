@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
-  const navigate = useNavigate();
+
   const [alerts, setAlerts] = useState([]);
   const [toilets, setToilets] = useState([]);
   const [predictions, setPredictions] = useState([]);
@@ -103,11 +103,7 @@ const pieData = {
             <h1>Dashboard</h1>
             <p>Monitor and manage hygiene across all facilities</p>
           </div>
-          <div>
-          <button onClick={() => navigate("/add-staff")}>
-               Add Staff Member
-          </button>
-          </div>
+          
           <button className="refresh-btn"
           onClick={fetchData}>
             ⟳ Refresh Data
