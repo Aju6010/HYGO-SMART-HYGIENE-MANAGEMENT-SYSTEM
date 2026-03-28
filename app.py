@@ -638,8 +638,8 @@ def receive_sensor_data():
 
     data = request.json
 
-    gas_status = data.get("gas_status")
     gas_value = data.get("gas_value")
+    gas_status = data.get("gas_status")
     distance = data.get("distance")
     status = data.get("status")
     count = data.get("count")
@@ -647,18 +647,27 @@ def receive_sensor_data():
 
     print("📡 ESP32 DATA:", data)
 
-    # 🔥 Convert gas to odour level (scale 0–10)
+    # convert gas to odour level
     odour_level = round(gas_value / 100, 2)
 
-    # 🔥 Insert into DB
     db, cursor = get_cursor()
 
     query = """
-    INSERT INTO sensor_data (toilet_id, odour_level, usage_count, timestamp)
-    VALUES (%s, %s, %s, NOW())
+    INSERT INTO sensor_data 
+    (toilet_id, odour_level, usage_count, gas_value, gas_status, distance, status, alert, timestamp)
+    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,NOW())
     """
 
-    cursor.execute(query, (1, odour_level, count))  # toilet_id = 1 for now
+    cursor.execute(query, (
+        1,                # toilet_id
+        odour_level,
+        count,
+        gas_value,
+        gas_status,
+        distance,
+        status,
+        alert
+    ))
 
     db.commit()
 

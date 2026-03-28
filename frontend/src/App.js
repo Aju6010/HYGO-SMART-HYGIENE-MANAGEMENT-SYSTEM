@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Intro from "./pages/Intro";
-import RoleSelect from "./pages/RoleSelect";
+import RoleSelect from "./pages/roleselect";
 import Login from "./pages/Login1";
 import StaffManagement from "./pages/StaffManagement";
 import ToiletStatus from "./pages/ToiletStatus";
