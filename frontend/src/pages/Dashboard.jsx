@@ -9,10 +9,10 @@ function Dashboard() {
   const [toilets, setToilets] = useState([]);
   const [predictions, setPredictions] = useState([]);
   const [toiletData, setToiletData] = useState([]); 
+;
 
-  // 🔗 Fetch alerts from Flask (DB)
-  useEffect(() => {
-
+ const fetchData = ()=> { 
+     console.log("REFRESH CLICKED");  
   // Alerts
   fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/cleaning-alerts")
     .then(res => res.json())
@@ -28,9 +28,13 @@ function Dashboard() {
     .then(res => res.json())
     .then(data => setPredictions(data))
     .catch(err => console.log("Prediction error:", err));
+ };  
 
+  // 🔗 Fetch alerts from Flask (DB)
+  useEffect(() => {
+    fetchData();
+  }, [])
 
-}, []);
 const total = toilets.length;
 const dirty = alerts.length;
 const clean = total - dirty;
@@ -96,7 +100,10 @@ const pieData = {
             <p>Monitor and manage hygiene across all facilities</p>
           </div>
 
-          <button className="refresh-btn">⟳ Refresh Data</button>
+          <button className="refresh-btn"
+          onClick={fetchData}>
+            ⟳ Refresh Data
+          </button>
         </div>
 
         {/* KPI CARDS — ORIGINAL DESIGN RESTORED */}
