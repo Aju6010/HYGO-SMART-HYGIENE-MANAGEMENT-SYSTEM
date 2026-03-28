@@ -2,42 +2,50 @@ import { useState } from "react";
 
 function AddStaff() {
   const [name, setName] = useState("");
-  const [role, setRole] = useState("");
 
-  const handleSubmit = () => {
-    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/add-staff", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ name, role })
-    })
-    .then(res => res.json())
-    .then(() => {
-      alert("✅ Staff added!");
-      setName("");
-      setRole("");
-    })
-    .catch(err => console.log(err));
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch(
+        "https://hygo-smart-hygiene-management-system.onrender.com/api/staff",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name,
+            status: "Active",
+            score: 0,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      alert("Staff Added ✅");
+      console.log(data);
+
+    } catch (err) {
+      console.log(err);
+      alert("Error adding staff ❌");
+    }
   };
 
   return (
-    <div>
-      <h2>Add Staff</h2>
+    <div style={{ padding: "30px" }}>
+      <h2>Add Staff Member</h2>
 
       <input
-        placeholder="Name"
+        type="text"
+        placeholder="Enter name"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
 
-      <input
-        placeholder="Role"
-        value={role}
-        onChange={(e) => setRole(e.target.value)}
-      />
+      <br /><br />
 
-      <button onClick={handleSubmit}>Save</button>
+      <button onClick={handleSubmit}>
+        Add Staff
+      </button>
     </div>
   );
 }

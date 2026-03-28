@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [alerts, setAlerts] = useState([]);
   const [toilets, setToilets] = useState([]);
   const [predictions, setPredictions] = useState([]);
   const [toiletData, setToiletData] = useState([]); 
-;
+
 
  const fetchData = ( ) => { 
      console.log("REFRESH CLICKED");  
@@ -39,6 +40,7 @@ function Dashboard() {
 const total = toilets.length;
 const dirty = alerts.length;
 const clean = total - dirty;
+
 
 // ===== DYNAMIC DATA =====
 
@@ -88,8 +90,6 @@ const pieData = {
     },
   ],
 };
-const navigate = useNavigate();
-
 
 
   return (
