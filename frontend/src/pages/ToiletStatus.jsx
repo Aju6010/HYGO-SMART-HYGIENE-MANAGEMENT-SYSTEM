@@ -6,7 +6,7 @@ export default function ToiletStatus() {
   const [toilets, setToilets] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/toilets")
+    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets")
       .then((res) => res.json())
       .then((data) => setToilets(data))
       .catch((err) => console.error("Error fetching toilets:", err));
