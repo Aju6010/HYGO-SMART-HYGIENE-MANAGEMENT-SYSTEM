@@ -8,6 +8,7 @@ function Dashboard() {
   const [alerts, setAlerts] = useState([]);
   const [toilets, setToilets] = useState([]);
   const [predictions, setPredictions] = useState([]);
+  const [toiletData, setToiletData] = useState([]); 
 
   // 🔗 Fetch alerts from Flask (DB)
   useEffect(() => {
