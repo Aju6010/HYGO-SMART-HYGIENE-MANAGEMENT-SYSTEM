@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AddStaff() {
+
   const [name, setName] = useState("");
   const [status, setStatus] = useState("on");
   const [score, setScore] = useState(80);
@@ -11,33 +12,26 @@ export default function AddStaff() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/add-staff", {
+    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name, status, score }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-
-        // ✅ Go back to staff page
-        navigate("/staff");
-      })
-      .catch((err) => console.error("Error:", err));
+      .then(res => res.json())
+      .then(() => navigate("/staff"));
   };
 
   return (
     <div style={{ padding: "30px" }}>
-      <h2>Add Staff Member</h2>
+      <h2>Add Staff</h2>
 
       <form onSubmit={handleSubmit}>
         <input
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          required
         />
 
         <br /><br />
@@ -51,14 +45,13 @@ export default function AddStaff() {
 
         <input
           type="number"
-          placeholder="Score"
           value={score}
           onChange={(e) => setScore(e.target.value)}
         />
 
         <br /><br />
 
-        <button type="submit">Add Staff</button>
+        <button type="submit">Add</button>
       </form>
     </div>
   );
