@@ -1,4 +1,4 @@
-import { Routes, Route, Router } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Intro from "./pages/Intro";
 import RoleSelect from "./pages/RoleSelect";
@@ -12,7 +12,6 @@ import AddStaff from "./pages/AddStaff";
 
 function App() {
   return (
-     <Router>
     
       <Routes>
         <Route path="/" element={<Intro />} />
@@ -26,7 +25,6 @@ function App() {
         <Route path="/staff-dashboard" element={<StaffDashboard />} />
         <Route path="/add-staff" element={<AddStaff />} />
       </Routes>
-    </Router>
     
   );
 }
