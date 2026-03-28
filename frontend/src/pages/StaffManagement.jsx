@@ -5,6 +5,7 @@ import "../styles/staff.css";
 export default function StaffManagement() {
   const [staff, setStaff] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff")
@@ -19,10 +20,15 @@ export default function StaffManagement() {
   const offDuty = staff.filter((s) => s.status === "off").length;
 
   // FILTERED STAFF
-  const filteredStaff =
-    filter === "all"
-      ? staff
-      : staff.filter((s) => s.status === filter);
+  const filteredStaff = staff.filter (s => 
+    s.name.toLowerCase().includes(search.toLowerCase()) || 
+    String(s.id).includes(search)
+  );
+      {filteredStaff.map((s) => (
+       <div key={s.id}>
+          <p>{s.name}  -  {s.role}</p>
+       </div>
+      ))}
 
   return (
     <div className="app">
@@ -37,6 +43,20 @@ export default function StaffManagement() {
           </div>
           <button className="add-btn">＋ Add Staff Member</button>
         </div>
+        {/* 🔍 SEARCH BAR HERE */}
+      <div style={{ margin: "15px 0" }}>
+      <input
+        type="text"
+         placeholder="Search by name or ID"
+         onChange={(e) => setSearch(e.target.value)}
+         style={{
+               padding: "10px",
+               width: "250px",
+              borderRadius: "8px",
+              border: "1px solid #ccc"
+                }}
+         />
+       </div>
 
         {/* SUMMARY CARDS */}
         <div className="staff-summary">

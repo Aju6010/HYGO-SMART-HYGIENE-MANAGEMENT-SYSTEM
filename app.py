@@ -673,5 +673,23 @@ def receive_sensor_data():
 
     return jsonify({"message": "Data stored successfully"})
 
+@app.route("/api/add-staff", methods=["POST"])
+def add_staff():
+    data = request.json
+
+    name = data.get("name")
+    role = data.get("role")
+
+    db, cursor = get_cursor()
+
+    cursor.execute(
+        "INSERT INTO staff (name, role) VALUES (%s, %s)",
+        (name, role)
+    )
+
+    db.commit()
+
+    return jsonify({"message": "Staff added"})
+
 if __name__ == "__main__":
     app.run(debug=True)

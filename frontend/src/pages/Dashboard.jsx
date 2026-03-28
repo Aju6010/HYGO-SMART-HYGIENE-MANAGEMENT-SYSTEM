@@ -3,6 +3,12 @@ import "chart.js/auto";
 import Sidebar from "../component/Sidebar";
 import "../styles/dash.css";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+const navigate = useNavigate();
+
+<button onClick={() => navigate("/add-staff")}>
+  Add Staff Member
+</button>
 
 function Dashboard() {
   const [alerts, setAlerts] = useState([]);
