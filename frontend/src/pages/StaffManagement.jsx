@@ -8,7 +8,7 @@ export default function StaffManagement() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
-  const [showModel, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
