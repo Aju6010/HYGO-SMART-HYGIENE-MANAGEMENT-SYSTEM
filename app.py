@@ -187,26 +187,26 @@ def staff():
     # ✅ POST → ADD STAFF
     # =========================
     if request.method == "POST":
-    data = request.json
+        data = request.json
 
-    name = data.get("name")
-    score = data.get("score", 0)
-    status = data.get("status", "off")
-    gender = data.get("gender")
-    dob = data.get("dob")
-    aadhar = data.get("aadhar")
-    mother_tongue = data.get("mother_tongue")
-    category = data.get("category")
-    address = data.get("address")
+        name = data.get("name")
+        score = data.get("score", 0)
+        status = data.get("status", "off")
+        gender = data.get("gender")
+        dob = data.get("dob")
+        aadhar = data.get("aadhar")
+        mother_tongue = data.get("mother_tongue")
+        category = data.get("category")
+        address = data.get("address")
 
-    if not name:
-        return jsonify({"error": "Name is required"}), 400
+        if not name:
+            return jsonify({"error": "Name is required"}), 400
 
-    query = """
-    INSERT INTO staff 
-    (name, score, status, gender, dob, aadhar, mother_tongue, category, address)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
+        query = """
+        INSERT INTO staff 
+        (name, score, status, gender, dob, aadhar, mother_tongue, category, address)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
 
     cursor.execute(query, (
         name, score, status, gender, dob,
