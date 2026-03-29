@@ -158,7 +158,7 @@ def cleaning_alerts():
 # Staff API
 # --------------------
 
-@app.route("/api/staff", methods=["GET", "POST"])
+@app.route("/api/staff", methods=["GET", "POST","OPTIONS"])
 def staff():
 
     db, cursor = get_cursor()
@@ -216,6 +216,9 @@ def staff():
     db.commit()
 
     return jsonify({"message": "Staff added successfully"})
+
+    if request.method == "OPTIONS":
+        return jsonify({"message": "OK"}), 200
 # --------------------
 # Toilets API
 # --------------------
@@ -690,6 +693,13 @@ def receive_sensor_data():
 
     return jsonify({"message": "Data stored successfully"})
 
+
+@app.after_request
+def after_request(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
