@@ -152,3 +152,69 @@
   border: none;
   cursor: pointer;
 }
+
+
+
+/* ===== MODAL STYLING ===== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  width: 420px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+/* Title */
+.modal-box h2 {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* Inputs */
+.modal-box input,
+.modal-box select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* Buttons */
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.modal-buttons button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Add */
+.add-btn {
+  background: #28a745;
+  color: white;
+}
+
+/* Cancel */
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+}

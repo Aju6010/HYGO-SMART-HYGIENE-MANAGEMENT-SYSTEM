@@ -44,29 +44,6 @@ def test():
     return jsonify({"message": "Flask connected!"})
 
 
-# --------------------
-# Add staff API
-# --------------------
-@app.route("/add_staff", methods=["POST"])
-def add_staff():
-
-    data = request.json
-    cursor = get_cursor()
-
-    query = """
-    INSERT INTO staff (staff_id, name, status)
-    VALUES (%s, %s, %s)
-    """
-
-    cursor.execute(
-        query,
-        (data["id"], data["name"], data["status"])
-    )
-
-    db.commit()
-
-    return jsonify({"message": "Staff added successfully"})
-
 
 # --------------------
 # Login API
@@ -192,14 +169,11 @@ def staff():
     if request.method == "GET":
         try:
             cursor.execute("""
-                SELECT 
-                    staff_id,
-                    name,
-                    status,
-                    score
-                FROM staff
-                ORDER BY staff_id DESC
-            """)
+            SELECT staff_id, name, score, status, gender, dob, aadhar, mother_tongue,
+             category, address
+            FROM staff
+            ORDER BY staff_id DESC
+                """)
 
             staff = cursor.fetchall()
 
@@ -213,35 +187,35 @@ def staff():
     # ✅ POST → ADD STAFF
     # =========================
     if request.method == "POST":
-        try:
-            data = request.get_json()
+    data = request.json
 
-            name = data.get("name")
-            status = data.get("status", "on")   # ✅ use "on/off"
-            score = data.get("score", 0)
+    name = data.get("name")
+    score = data.get("score", 0)
+    status = data.get("status", "off")
+    gender = data.get("gender")
+    dob = data.get("dob")
+    aadhar = data.get("aadhar")
+    mother_tongue = data.get("mother_tongue")
+    category = data.get("category")
+    address = data.get("address")
 
-            # ⚠️ validation
-            if not name:
-                return jsonify({"error": "Name is required"}), 400
+    if not name:
+        return jsonify({"error": "Name is required"}), 400
 
-            query = """
-            INSERT INTO staff (name, status, score)
-            VALUES (%s, %s, %s)
-            """
+    query = """
+    INSERT INTO staff 
+    (name, score, status, gender, dob, aadhar, mother_tongue, category, address)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
 
-            cursor.execute(query, (name, status, score))
-            db.commit()
+    cursor.execute(query, (
+        name, score, status, gender, dob,
+        aadhar, mother_tongue, category, address
+    ))
 
-            return jsonify({
-                "message": "Staff added successfully",
-                "name": name,
-                "status": status,
-                "score": score
-            }), 201
+    db.commit()
 
-        except Exception as e:
-            print("POST ERROR:", e)
-            return jsonify({"error": str(e)}), 500
+    return jsonify({"message": "Staff added successfully"})
 # --------------------
 # Toilets API
 # --------------------
@@ -716,23 +690,6 @@ def receive_sensor_data():
 
     return jsonify({"message": "Data stored successfully"})
 
-@app.route("/api/add-staff", methods=["POST"])
-def add_staff():
-    data = request.json
-
-    name = data.get("name")
-    role = data.get("role")
-
-    db, cursor = get_cursor()
-
-    cursor.execute(
-        "INSERT INTO staff (name, role) VALUES (%s, %s)",
-        (name, role)
-    )
-
-    db.commit()
-
-    return jsonify({"message": "Staff added"})
 
 if __name__ == "__main__":
     app.run(debug=True)

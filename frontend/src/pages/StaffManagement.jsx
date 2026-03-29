@@ -8,6 +8,8 @@ export default function StaffManagement() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const [showModel, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff")
@@ -33,6 +35,67 @@ export default function StaffManagement() {
     return matchesSearch && matchesFilter;
   });
 
+  const [formData, setFormData] = useState({
+  name: "",
+  phone: "",
+  score: "",
+  gender: "",
+  dob: "",
+  aadhar: "",
+  mother_tongue: "",
+  category: "",
+  address: "",
+  status: "on"
+});
+
+const handleChange = (e) => {
+  setFormData({
+    ...formData,
+    [e.target.name]: e.target.value
+  });
+};
+console.log(formData);
+const handleSubmit = async () => {
+  
+  try {
+    if (!formData.name || !formData.phone) {
+      alert("❌ Name and Phone are required");
+      return;
+    }
+    setLoading(true);
+    const res = await fetch("https://hygo-smart-hygiene.onrender.com/api/staff", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    });
+   
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("✅ Staff added successfully");
+
+      setFormData({
+        name: "",
+        phone: "",
+        score: "",
+        gender: "",
+        address: "",
+        status: "on",
+      })
+      setShowModal(false);
+    } else {
+      alert("❌ fail to connect to Server");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Server error");
+  }
+  setLoading(false);
+};
+
   return (
     <div className="app">
       <Sidebar />
@@ -45,7 +108,7 @@ export default function StaffManagement() {
             <p>Manage cleaning staff and assignments</p>
           </div>
           <button
-            onClick={() => navigate("/add-staff")}
+            onClick={() => setShowModal(true)}
             className="add-btn"
           >
             ＋ Add Staff Member
@@ -119,6 +182,47 @@ export default function StaffManagement() {
             </div>
           ))}
         </div>
+         {showModal && (
+  <div className="modal-overlay">
+    <div className="modal-box">
+
+      <h2>Add New Staff Member</h2>
+
+      <input name="name" placeholder="Name"
+      value={formData.name} onChange={handleChange} />
+      <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} />
+      <input name="score" type="number" placeholder="Score" value={formData.score} onChange={handleChange} />
+
+      <select name="gender" value={formData.gender} onChange={handleChange}>
+        <option value="">Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+
+      <input name="dob" type="date" onChange={handleChange} />
+      <input name="aadhar" placeholder="Aadhar" onChange={handleChange} />
+      <input name="mother_tongue" placeholder="Mother Tongue" onChange={handleChange} />
+      <input name="category" placeholder="Category" onChange={handleChange} />
+      <input name="address" placeholder="Address" onChange={handleChange} />
+
+      <select name="status" onChange={handleChange}>
+        <option value="on">On Duty</option>
+        <option value="off">Off Duty</option>
+      </select>
+
+      <div className="modal-buttons">
+        <button onClick={() => setShowModal(false)} className="cancel-btn">
+          Cancel
+        </button>
+        <button onClick={handleSubmit} className="add-btn" disabled={!formData.name}
+        >
+          Add Staff
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
       </div>
     </div>
   );
