@@ -50,7 +50,7 @@ export default function ToiletStatus() {
       return;
     }
 
-    const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilet", {
+    const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
