@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import cross_origin
 from flask_cors import CORS
 import mysql.connector
 from datetime import datetime, timedelta
@@ -15,7 +16,8 @@ CLEANING_TIME_LIMIT_HOURS = 6
 # App setup
 # --------------------
 app = Flask(__name__)
-CORS(app)
+CORS(app,resources={r"/api/*":{"origins":"*"}},
+ supports_credentials=True)
 
 # --------------------
 # Database connection
@@ -158,6 +160,7 @@ def cleaning_alerts():
 # Staff API
 # --------------------
 @app.route("/api/staff", methods=["GET", "POST", "OPTIONS"])
+@cross_origin()
 def staff():
 
     db, cursor = get_cursor()
@@ -166,7 +169,8 @@ def staff():
     # OPTIONS (CORS FIX)
     # =========================
     if request.method == "OPTIONS":
-        return jsonify({"message": "OK"}), 200
+        response = jsonify({"message": "OK"})
+        return response, 200
 
     # =========================
     # GET → FETCH STAFF
@@ -698,13 +702,6 @@ def receive_sensor_data():
 
     return jsonify({"message": "Data stored successfully"})
 
-
-@app.after_request
-def after_request(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
-    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
