@@ -15,7 +15,7 @@ CLEANING_TIME_LIMIT_HOURS = 6
 # App setup
 # --------------------
 app = Flask(__name__)
-CORS(app,origin=["https://hygo-frontend.onrender.com"])
+CORS(app)
 
 # --------------------
 # Database connection
