@@ -231,18 +231,59 @@ def staff():
 # --------------------
 # Toilets API
 # --------------------
-@app.route("/api/toilets")
-def get_toilets():
+@app.route("/api/toilets", methods=["GET", "POST", "OPTIONS"])
+def toilets():
 
     db, cursor = get_cursor()
 
-    cursor.execute("SELECT * FROM toilet")
+    # ✅ CORS preflight
+    if request.method == "OPTIONS":
+        return jsonify({"message": "OK"}), 200
 
-    data = cursor.fetchall()
+    # ======================
+    # GET → FETCH TOILETS
+    # ======================
+    if request.method == "GET":
+        try:
+            cursor.execute("SELECT * FROM toilet")
+            data = cursor.fetchall()
+            return jsonify(data), 200
+        except Exception as e:
+            print("GET ERROR:", e)
+            return jsonify({"error": str(e)}), 500
 
-    return jsonify(data)
+    # ======================
+    # POST → ADD TOILET
+    # ======================
+    if request.method == "POST":
+        try:
+            data = request.json
 
+            toilet_id = data.get("toilet_id")
+            location = data.get("location")
+            building = data.get("building")
+            cleanliness = data.get("cleanliness", 100)
+            status = data.get("status", "clean")
 
+            if not toilet_id or not location:
+                return jsonify({"error": "Toilet ID & Location required"}), 400
+
+            query = """
+            INSERT INTO toilet (toilet_id, location, building, cleanliness, status)
+            VALUES (%s, %s, %s, %s, %s)
+            """
+
+            cursor.execute(query, (
+                toilet_id, location, building, cleanliness, status
+            ))
+
+            db.commit()
+
+            return jsonify({"message": "Toilet added"}), 201
+
+        except Exception as e:
+            print("POST ERROR:", e)
+            return jsonify({"error": str(e)}), 500
 # --------------------
 # Alerts API
 # --------------------

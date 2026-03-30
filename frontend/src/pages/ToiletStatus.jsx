@@ -26,6 +26,57 @@ export default function ToiletStatus() {
     return 0;
   };
 
+  const [showModal, setShowModal] = useState(false);
+
+  const [formData, setFormData] = useState({
+   toilet_id: "",
+    location: "",
+    building: "",
+    cleanliness: 100,
+    status: "clean"
+  });
+
+  const handleChange = (e) => {
+  setFormData({
+    ...formData,
+    [e.target.name]: e.target.value
+  });
+};
+
+ const handleSubmit = async () => {
+  try {
+    if (!formData.toilet_id || !formData.location) {
+      alert("❌ ID and Location required");
+      return;
+    }
+
+    const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("✅ Toilet added successfully");
+
+      setShowModal(false);
+
+      // optional refresh
+      window.location.reload();
+    } else {
+      alert("❌ Failed to add toilet");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Server error");
+  }
+};
+
   return (
     <div className="app">
       <Sidebar />
@@ -38,7 +89,9 @@ export default function ToiletStatus() {
             <p>Monitor all toilet facilities in real-time</p>
           </div>
 
-          <button className="add-btn">＋ Add Toilet</button>
+          <button onClick={() => setShowModal(true)}
+           className="add-btn">
+            ＋ Add Toilet</button>
         </div>
 
         {/* SUMMARY CARDS */}
@@ -104,6 +157,41 @@ export default function ToiletStatus() {
           })}
         </div>
       </div>
+      {showModal && (
+  <div className="modal-overlay">
+    <div className="modal-box">
+
+      <h2>Add New Toilet</h2>
+
+      <input name="toilet_id" placeholder="Toilet ID" onChange={handleChange} />
+      <input name="location" placeholder="Location" onChange={handleChange} />
+      <input name="building" placeholder="Building" onChange={handleChange} />
+
+      <input 
+        name="cleanliness" 
+        type="number" 
+        placeholder="Cleanliness %" 
+        onChange={handleChange} 
+      />
+
+      <select name="status" onChange={handleChange}>
+        <option value="clean">Clean</option>
+        <option value="dirty">Dirty</option>
+        <option value="maintenance">Maintenance</option>
+      </select>
+
+      <div className="modal-buttons">
+        <button onClick={() => setShowModal(false)} className="cancel-btn">
+          Cancel
+        </button>
+        <button onClick={handleSubmit} className="add-btn">
+          Add Toilet
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }
