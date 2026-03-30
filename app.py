@@ -723,7 +723,7 @@ def receive_sensor_data():
     """
 
     cursor.execute(query, (
-        1,                # toilet_id
+        10,                # toilet_id
         odour_level,
         count,
         gas_value,
