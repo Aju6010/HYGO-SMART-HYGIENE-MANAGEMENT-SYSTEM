@@ -241,7 +241,19 @@ def toilets():
     # ======================
     if request.method == "GET":
         try:
-            cursor.execute("SELECT * FROM toilet")
+            cursor.execute("""
+SELECT 
+    t.toilet_id,
+    t.location,
+    t.building,
+    s.status,
+    s.odour_level,
+    s.gas_value,
+    s.distance
+FROM toilet t
+JOIN sensor_data s 
+ON t.toilet_id = s.toilet_id
+""")
             data = cursor.fetchall()
             return jsonify(data), 200
         except Exception as e:
