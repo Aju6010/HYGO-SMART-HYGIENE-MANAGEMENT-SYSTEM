@@ -263,12 +263,12 @@ def toilets():
                 return jsonify({"error": "Toilet ID & Location required"}), 400
 
             query = """
-            INSERT INTO toilet (toilet_id, location, status)
-            VALUES (%s, %s, %s)
+            INSERT INTO toilet (toilet_id, location, status, last_cleaned_time)
+            VALUES (%s, %s, %s,%s)
             """
 
             cursor.execute(query, (
-                toilet_id, location, status
+                toilet_id, location, status, datetime.now()
             ))
 
             db.commit()
