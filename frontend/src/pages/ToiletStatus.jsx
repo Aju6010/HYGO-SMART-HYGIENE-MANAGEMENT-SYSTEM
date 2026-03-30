@@ -25,6 +25,7 @@ export default function ToiletStatus() {
     if (status === "maintenance") return 60;
     return 0;
   };
+  const [search, setSearch] = useState("");
 
   const [showModal, setShowModal] = useState(false);
 
@@ -76,6 +77,14 @@ export default function ToiletStatus() {
     alert("❌ Server error");
   }
 };
+const filteredToilets = toilets.filter((t) => {
+  const searchLower = search.toLowerCase();
+
+  return (
+    String(t.toilet_id).toLowerCase().includes(searchLower) ||
+    (t.location && t.location.toLowerCase().includes(searchLower))
+  );
+});
 
   return (
     <div className="app">
@@ -119,12 +128,13 @@ export default function ToiletStatus() {
 
         {/* SEARCH (UI ONLY for now) */}
         <div className="toilet-search">
-          <input placeholder="Search by ID or location..." />
+          <input placeholder="Search by ID or location..." 
+          value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
         {/* TOILET CARDS */}
         <div className="toilet-grid">
-          {toilets.map((t) => {
+          {filteredToilets.map((t) => {
             const score = getScore(t.status);
 
             return (

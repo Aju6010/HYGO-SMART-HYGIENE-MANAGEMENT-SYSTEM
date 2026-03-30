@@ -230,18 +230,13 @@ def staff():
             return jsonify({"error": str(e)}), 500
 # --------------------
 # Toilets API
-# --------------------
-@app.route("/api/toilets", methods=["GET", "POST", "OPTIONS"])
+# --------------------@app.route("/api/toilets", methods=["GET", "POST"])
 def toilets():
 
     db, cursor = get_cursor()
 
-    # ✅ CORS preflight
-    if request.method == "OPTIONS":
-        return jsonify({"message": "OK"}), 200
-
     # ======================
-    # GET → FETCH TOILETS
+    # GET
     # ======================
     if request.method == "GET":
         try:
@@ -253,7 +248,7 @@ def toilets():
             return jsonify({"error": str(e)}), 500
 
     # ======================
-    # POST → ADD TOILET
+    # POST
     # ======================
     if request.method == "POST":
         try:
