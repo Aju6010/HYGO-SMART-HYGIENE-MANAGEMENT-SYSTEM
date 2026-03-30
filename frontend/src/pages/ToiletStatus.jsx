@@ -59,7 +59,13 @@ export default function ToiletStatus() {
       body: JSON.stringify(formData)
     });
 
-    const data = await res.json();
+    let data;
+
+    try{
+      data = await res.json();
+    } catch{
+      data = null;
+    }
 
     if (res.ok) {
       alert("✅ Toilet added successfully");
