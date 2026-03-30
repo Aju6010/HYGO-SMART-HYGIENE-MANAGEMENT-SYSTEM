@@ -108,9 +108,6 @@ export default function AlertsFeedback() {
             <h1>Alerts & Feedback</h1>
             <p>Monitor alerts and user feedback</p>
           </div>
-          <button className="create-alert-btn" onClick={() => setShowModal(true)}>
-            <span className="btn-plus">+</span> Create Alert
-          </button>
         </header>
 
         <div className="summary-grid">
