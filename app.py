@@ -230,7 +230,8 @@ def staff():
             return jsonify({"error": str(e)}), 500
 # --------------------
 # Toilets API
-# --------------------@app.route("/api/toilets", methods=["GET", "POST"])
+# --------------------
+@app.route("/api/toilets", methods=["GET", "POST"])
 def toilets():
 
     db, cursor = get_cursor()
