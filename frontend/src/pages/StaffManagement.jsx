@@ -63,7 +63,7 @@ const handleSubmit = async () => {
       return;
     }
     setLoading(true);
-    const res = await fetch("https://hygo-smart-hygiene.onrender.com/api/staff", {
+    const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
