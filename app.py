@@ -257,20 +257,18 @@ def toilets():
 
             toilet_id = data.get("toilet_id")
             location = data.get("location")
-            building = data.get("building")
-            cleanliness = data.get("cleanliness", 100)
             status = data.get("status", "clean")
 
             if not toilet_id or not location:
                 return jsonify({"error": "Toilet ID & Location required"}), 400
 
             query = """
-            INSERT INTO toilet (toilet_id, location, building, cleanliness, status)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO toilet (toilet_id, location, status)
+            VALUES (%s, %s, %s)
             """
 
             cursor.execute(query, (
-                toilet_id, location, building, cleanliness, status
+                toilet_id, location, status
             ))
 
             db.commit()

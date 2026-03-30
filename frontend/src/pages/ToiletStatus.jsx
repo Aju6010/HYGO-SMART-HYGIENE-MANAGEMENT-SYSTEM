@@ -32,8 +32,6 @@ export default function ToiletStatus() {
   const [formData, setFormData] = useState({
    toilet_id: "",
     location: "",
-    building: "",
-    cleanliness: 100,
     status: "clean"
   });
 
@@ -181,14 +179,6 @@ const filteredToilets = toilets.filter((t) => {
 
       <input name="toilet_id" placeholder="Toilet ID" onChange={handleChange} />
       <input name="location" placeholder="Location" onChange={handleChange} />
-      <input name="building" placeholder="Building" onChange={handleChange} />
-
-      <input 
-        name="cleanliness" 
-        type="number" 
-        placeholder="Cleanliness %" 
-        onChange={handleChange} 
-      />
 
       <select name="status" onChange={handleChange}>
         <option value="clean">Clean</option>
