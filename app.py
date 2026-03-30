@@ -157,26 +157,29 @@ def cleaning_alerts():
 # --------------------
 # Staff API
 # --------------------
-
-@app.route("/api/staff", methods=["GET", "POST","OPTIONS"])
+@app.route("/api/staff", methods=["GET", "POST", "OPTIONS"])
 def staff():
 
     db, cursor = get_cursor()
 
     # =========================
-    # ✅ GET → FETCH STAFF
+    # OPTIONS (CORS FIX)
+    # =========================
+    if request.method == "OPTIONS":
+        return jsonify({"message": "OK"}), 200
+
+    # =========================
+    # GET → FETCH STAFF
     # =========================
     if request.method == "GET":
         try:
             cursor.execute("""
-            SELECT staff_id, name, score, status, gender, dob, aadhar, mother_tongue,
-             category, address
-            FROM staff
-            ORDER BY staff_id DESC
-                """)
-
+                SELECT staff_id, name, score, status, gender, dob, aadhar, mother_tongue,
+                       category, address
+                FROM staff
+                ORDER BY staff_id DESC
+            """)
             staff = cursor.fetchall()
-
             return jsonify(staff), 200
 
         except Exception as e:
@@ -184,41 +187,43 @@ def staff():
             return jsonify({"error": str(e)}), 500
 
     # =========================
-    # ✅ POST → ADD STAFF
+    # POST → ADD STAFF
     # =========================
     if request.method == "POST":
-        data = request.json
+        try:
+            data = request.json
 
-        name = data.get("name")
-        score = data.get("score", 0)
-        status = data.get("status", "off")
-        gender = data.get("gender")
-        dob = data.get("dob")
-        aadhar = data.get("aadhar")
-        mother_tongue = data.get("mother_tongue")
-        category = data.get("category")
-        address = data.get("address")
+            name = data.get("name")
+            score = data.get("score", 0)
+            status = data.get("status", "off")
+            gender = data.get("gender")
+            dob = data.get("dob")
+            aadhar = data.get("aadhar")
+            mother_tongue = data.get("mother_tongue")
+            category = data.get("category")
+            address = data.get("address")
 
-        if not name:
-            return jsonify({"error": "Name is required"}), 400
+            if not name:
+                return jsonify({"error": "Name is required"}), 400
 
-        query = """
-        INSERT INTO staff 
-        (name, score, status, gender, dob, aadhar, mother_tongue, category, address)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
+            query = """
+            INSERT INTO staff 
+            (name, score, status, gender, dob, aadhar, mother_tongue, category, address)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
 
-    cursor.execute(query, (
-        name, score, status, gender, dob,
-        aadhar, mother_tongue, category, address
-    ))
+            cursor.execute(query, (
+                name, score, status, gender, dob,
+                aadhar, mother_tongue, category, address
+            ))
 
-    db.commit()
+            db.commit()
 
-    return jsonify({"message": "Staff added successfully"})
+            return jsonify({"message": "Staff added successfully"}), 201
 
-    if request.method == "OPTIONS":
-        return jsonify({"message": "OK"}), 200
+        except Exception as e:
+            print("POST ERROR:", e)
+            return jsonify({"error": str(e)}), 500
 # --------------------
 # Toilets API
 # --------------------
