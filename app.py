@@ -245,13 +245,12 @@ def toilets():
 SELECT 
     t.toilet_id,
     t.location,
-    t.building,
-    s.status,
+    COALESCE(s.status, t.status) AS status,
     s.odour_level,
     s.gas_value,
     s.distance
 FROM toilet t
-JOIN sensor_data s 
+LEFT JOIN sensor_data s 
 ON t.toilet_id = s.toilet_id
 """)
             data = cursor.fetchall()
