@@ -107,10 +107,15 @@ def cleaning_alerts():
     alerts = []
 
     cursor.execute("""
-        SELECT s.toilet_id, s.odour_level, s.usage_count, t.location
-        FROM sensor_data s
-        JOIN toilet t ON s.toilet_id = t.toilet_id
-        ORDER BY s.timestamp DESC
+        SELECT s1.toilet_id, s1.odour_level, s1.usage_count, t.location
+        FROM sensor_data s1
+        LEFT JOIN toilet t ON s1.toilet_id = t.toilet_id
+        WHERE s1.timestamp = (
+            SELECT MAX(timestamp)
+            FROM sensor_data s2
+            WHERE s1.toilet_id = s2.toilet_id
+        )
+        ORDER BY s1.timestamp DESC
     """)
 
     sensor_rows = cursor.fetchall()
@@ -243,15 +248,19 @@ def toilets():
         try:
             cursor.execute("""
 SELECT 
-    t.toilet_id,
+    s1.toilet_id,
     t.location,
-    COALESCE(s.status, t.status) AS status,
-    s.odour_level,
-    s.gas_value,
-    s.distance
-FROM toilet t
-LEFT JOIN sensor_data s 
-ON t.toilet_id = s.toilet_id
+    COALESCE(s1.status, t.status, 'Online') AS status,
+    s1.odour_level,
+    s1.gas_value,
+    s1.distance
+FROM sensor_data s1
+LEFT JOIN toilet t ON s1.toilet_id = t.toilet_id
+WHERE s1.timestamp = (
+    SELECT MAX(timestamp)
+    FROM sensor_data s2
+    WHERE s1.toilet_id = s2.toilet_id
+)
 """)
             data = cursor.fetchall()
             return jsonify(data), 200
@@ -340,11 +349,6 @@ def get_alerts():
 # --------------------
 @app.route("/api/feedback")
 def get_feedback():
-
-    global db
-
-    if not db.is_connected():
-        db.reconnect()
 
     db, cursor = get_cursor()
 
