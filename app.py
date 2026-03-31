@@ -120,23 +120,33 @@ def cleaning_alerts():
 
     sensor_rows = cursor.fetchall()
 
-    for row in sensor_rows:
+    alerts_dict = {}
 
-        if row["odour_level"] > ODOUR_THRESHOLD:
-            alerts.append({
-                "toilet_id": row["toilet_id"],
+    for row in sensor_rows:
+        tid = row["toilet_id"]
+        
+        # Combine if BOTH are true, else pick one
+        if row["odour_level"] > ODOUR_THRESHOLD and row["usage_count"] > USAGE_THRESHOLD:
+            alerts_dict[tid] = {
+                "toilet_id": tid,
+                "location": row["location"],
+                "type": "URGENT_CLEANING",
+                "message": "High odour and usage detected. Cleaning required."
+            }
+        elif row["odour_level"] > ODOUR_THRESHOLD:
+            alerts_dict[tid] = {
+                "toilet_id": tid,
                 "location": row["location"],
                 "type": "HIGH_ODOUR",
                 "message": "High odour detected. Cleaning required."
-            })
-
-        if row["usage_count"] > USAGE_THRESHOLD:
-            alerts.append({
-                "toilet_id": row["toilet_id"],
+            }
+        elif row["usage_count"] > USAGE_THRESHOLD:
+            alerts_dict[tid] = {
+                "toilet_id": tid,
                 "location": row["location"],
                 "type": "HIGH_USAGE",
                 "message": "High usage detected. Cleaning required."
-            })
+            }
 
     time_limit = datetime.now() - timedelta(hours=CLEANING_TIME_LIMIT_HOURS)
 
@@ -150,13 +160,17 @@ def cleaning_alerts():
     toilets = cursor.fetchall()
 
     for t in toilets:
+        tid = t["toilet_id"]
+        # Only add 'NOT_CLEANED' alert if there wasn't already a sensor alert for it
+        if tid not in alerts_dict:
+            alerts_dict[tid] = {
+                "toilet_id": tid,
+                "location": t["location"],
+                "type": "NOT_CLEANED",
+                "message": "Toilet not cleaned for a long time."
+            }
 
-        alerts.append({
-            "toilet_id": t["toilet_id"],
-            "location": t["location"],
-            "type": "NOT_CLEANED",
-            "message": "Toilet not cleaned for a long time."
-        })
+    alerts = list(alerts_dict.values())
 
     return jsonify(alerts)
 
