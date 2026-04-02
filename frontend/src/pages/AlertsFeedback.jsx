@@ -203,7 +203,7 @@ export default function AlertsFeedback() {
                       <div style={{ display: "flex", gap: "10px" }}>
                         <select className="filter-select" style={{ flex: 1 }} value={selectedStaff} onChange={(e) => setSelectedStaff(e.target.value)}>
                           <option value="">Select available staff</option>
-                          {staff.filter(s => s.attendance_status === "Present").map((s) => (
+                          {staff.filter(s => s.status === "on").map((s) => (
                             <option key={s.staff_id} value={s.staff_id}>{s.name} (ID: {s.staff_id})</option>
                           ))}
                         </select>

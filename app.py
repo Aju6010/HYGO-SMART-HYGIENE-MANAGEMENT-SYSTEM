@@ -357,6 +357,39 @@ def get_alerts():
 
     return jsonify(alerts)
 
+@app.route("/api/alerts/<alert_id>/assign", methods=["POST", "OPTIONS"])
+@cross_origin()
+def assign_alert(alert_id):
+    if request.method == "OPTIONS":
+        return jsonify({"message": "OK"}), 200
+
+    data = request.json
+    staff_id = data.get("staff_id")
+    
+    if not staff_id:
+        return jsonify({"error": "Staff ID is required"}), 400
+
+    try:
+        toilet_id_str = alert_id.replace("T-", "") if str(alert_id).startswith("T-") else alert_id
+        toilet_id = int(toilet_id_str)
+    except ValueError:
+        return jsonify({"error": "Invalid alert ID"}), 400
+
+    db, cursor = get_cursor()
+
+    try:
+        query = """
+        INSERT INTO cleaning_log (toilet_id, staff_id, assigned_time, attendance_status, verification_status)
+        VALUES (%s, %s, NOW(), 'Assigned', 'Pending')
+        """
+        cursor.execute(query, (toilet_id, staff_id))
+        db.commit()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"message": "Staff assigned successfully", "status": "Acknowledged"}), 200
 
 # --------------------
 # Feedback API
