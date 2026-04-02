@@ -8,7 +8,8 @@ import numpy as np
 model= joblib.load("hygo_model.pkl")
 
 
-ODOUR_THRESHOLD = 70
+ODOUR_THRESHOLD_DIRTY = 2.5
+ODOUR_THRESHOLD_MODERATE = 1.2
 USAGE_THRESHOLD = 30
 CLEANING_TIME_LIMIT_HOURS = 6
 
@@ -126,19 +127,26 @@ def cleaning_alerts():
         tid = row["toilet_id"]
         
         # Combine if BOTH are true, else pick one
-        if row["odour_level"] > ODOUR_THRESHOLD and row["usage_count"] > USAGE_THRESHOLD:
+        if row["odour_level"] > ODOUR_THRESHOLD_DIRTY and row["usage_count"] > USAGE_THRESHOLD:
             alerts_dict[tid] = {
                 "toilet_id": tid,
                 "location": row["location"],
                 "type": "URGENT_CLEANING",
                 "message": "High odour and usage detected. Cleaning required."
             }
-        elif row["odour_level"] > ODOUR_THRESHOLD:
+        elif row["odour_level"] > ODOUR_THRESHOLD_DIRTY:
             alerts_dict[tid] = {
                 "toilet_id": tid,
                 "location": row["location"],
                 "type": "HIGH_ODOUR",
                 "message": "High odour detected. Cleaning required."
+            }
+        elif row["odour_level"] > ODOUR_THRESHOLD_MODERATE:
+            alerts_dict[tid] = {
+                "toilet_id": tid,
+                "location": row["location"],
+                "type": "MODERATE_ODOUR",
+                "message": "Moderate odour detected. Consider inspection."
             }
         elif row["usage_count"] > USAGE_THRESHOLD:
             alerts_dict[tid] = {
@@ -262,15 +270,20 @@ def toilets():
         try:
             cursor.execute("""
 SELECT 
-    s1.toilet_id,
+    t.toilet_id,
     t.location,
-    COALESCE(s1.status, t.status, 'Online') AS status,
+    CASE 
+        WHEN s1.odour_level > 2.5 THEN 'dirty'
+        WHEN s1.odour_level > 1.2 THEN 'moderate'
+        WHEN s1.odour_level IS NOT NULL THEN 'clean'
+        ELSE COALESCE(LOWER(t.status), 'online')
+    END AS status,
     s1.odour_level,
     s1.gas_value,
     s1.distance
-FROM sensor_data s1
-LEFT JOIN toilet t ON s1.toilet_id = t.toilet_id
-WHERE s1.timestamp = (
+FROM toilet t
+LEFT JOIN sensor_data s1 ON t.toilet_id = s1.toilet_id
+AND s1.timestamp = (
     SELECT MAX(timestamp)
     FROM sensor_data s2
     WHERE s1.toilet_id = s2.toilet_id
@@ -325,8 +338,8 @@ def get_alerts():
         CONCAT('T-', toilet_id) AS id,
 
         CASE 
-            WHEN odour_level > 6 THEN 'critical'
-            WHEN usage_count > 40 THEN 'medium'
+            WHEN odour_level > 2.5 THEN 'critical'
+            WHEN usage_count > 30 THEN 'medium'
             ELSE 'low'
         END AS severity,
 
@@ -346,7 +359,7 @@ def get_alerts():
         WHERE s1.toilet_id = s2.toilet_id
     )
 
-    AND (odour_level > 6 OR usage_count > 40)
+    AND (odour_level > 1.2 OR usage_count > 30)
 
     ORDER BY timestamp DESC
     """
@@ -754,15 +767,15 @@ def predict_from_db():
             prediction = 30  # fallback
 
         # 🎯 convert to status and score
-        if prediction < 30:
-            status = "Clean"
-            score = 90 # High score for clean
-        elif prediction < 60:
-            status = "Moderate"
+        if row["odour_level"] > 2.5:
+            status = "dirty"
+            score = 30
+        elif row["odour_level"] > 1.2:
+            status = "moderate"
             score = 60
         else:
-            status = "Dirty Soon"
-            score = 30 # Low score for dirty
+            status = "clean"
+            score = 90
 
         results.append({
             "toilet_id": toilet_id,
@@ -791,6 +804,7 @@ def receive_sensor_data():
 
     # convert gas to odour level
     odour_level = round(gas_value / 100, 2)
+    status = (status or "clean").lower()
 
     db, cursor = get_cursor()
 
