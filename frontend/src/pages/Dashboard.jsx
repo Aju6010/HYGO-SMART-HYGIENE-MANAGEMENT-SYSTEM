@@ -48,13 +48,9 @@ const clean = total - dirty;
 const labels = predictions.map(t => `T${t.toilet_id}`);
 
 // Data
-const usageData = predictions.map(t => t.predicted_minutes || 0);
+const usageData = predictions.map(t => t.usage_count || 0);
 
-const cleanlinessData = predictions.map(t => {
-  if (t.status === "Clean") return 90;
-  if (t.status === "Moderate") return 60;
-  return 30;
-});
+const cleanlinessData = predictions.map(t => t.cleanliness_score || 0);
 
 // ✅ ONLY ONE data object
 const data = {
@@ -79,7 +75,7 @@ console.log("API DATA:", toilets);
 // ===== PIE CHART =====
 const cleanCount = predictions.filter(t => t.status === "Clean").length;
 const moderateCount = predictions.filter(t => t.status === "Moderate").length;
-const dirtyCount = predictions.filter(t => t.status === "Dirty").length;
+const dirtyCount = predictions.filter(t => t.status === "Dirty" || t.status === "Dirty Soon").length;
 
 const pieData = {
   labels: ["Clean", "Moderate", "Dirty"],

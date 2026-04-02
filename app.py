@@ -709,29 +709,40 @@ def predict_from_db():
 
     db, cursor = get_cursor()
 
-    # ✅ latest cleaning per toilet
-    cursor.execute("""
-        SELECT toilet_id, MAX(cleaned_time) as last_cleaned
-        FROM cleaning_log
-        GROUP BY toilet_id
-    """)
+    # ✅ Get latest sensor data AND last cleaning time for each toilet
+    query = """
+    SELECT 
+        s1.toilet_id,
+        s1.usage_count,
+        s1.odour_level,
+        (SELECT MAX(cleaned_time) FROM cleaning_log WHERE toilet_id = s1.toilet_id) as last_cleaned
+    FROM sensor_data s1
+    WHERE s1.timestamp = (
+        SELECT MAX(timestamp) 
+        FROM sensor_data s2 
+        WHERE s1.toilet_id = s2.toilet_id
+    )
+    """
 
-    logs = cursor.fetchall()
+    cursor.execute(query)
+    rows = cursor.fetchall()
 
     results = []
 
-    for log in logs:
+    for row in rows:
+        toilet_id = row["toilet_id"]
+        last_cleaned_time = row["last_cleaned"]
 
-        toilet_id = log["toilet_id"]
-        last_cleaned_time = log["last_cleaned"]
+        # Default if never cleaned
+        if not last_cleaned_time:
+            last_cleaned_time = datetime.now() - timedelta(hours=24)
 
         # ⏱ time since cleaned (hours)
         hours_since_clean = (
             datetime.now() - last_cleaned_time
         ).total_seconds() / 3600
 
-        # 🧪 dummy values (replace later)
-        usage_count = 100
+        usage_count = row["usage_count"] or 0
         time_of_day = datetime.now().hour
 
         # 🤖 model input
@@ -742,18 +753,23 @@ def predict_from_db():
         except:
             prediction = 30  # fallback
 
-        # 🎯 convert to status
+        # 🎯 convert to status and score
         if prediction < 30:
             status = "Clean"
+            score = 90 # High score for clean
         elif prediction < 60:
             status = "Moderate"
+            score = 60
         else:
             status = "Dirty Soon"
+            score = 30 # Low score for dirty
 
         results.append({
             "toilet_id": toilet_id,
             "predicted_minutes": int(prediction),
-            "status": status
+            "status": status,
+            "usage_count": usage_count,
+            "cleanliness_score": score
         })
 
     return jsonify(results)
