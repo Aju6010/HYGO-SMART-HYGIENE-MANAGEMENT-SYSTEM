@@ -22,6 +22,7 @@
 .summary-card.dirty { background: #fff1f2; }
 .summary-card.maintenance { background: #fff7ed; }
 .summary-card.offline { background: #f1f5f9; }
+.summary-card.needs-cleaning { background: #fef3c7; }
 
 /* SEARCH */
 .toilet-search {
@@ -73,6 +74,11 @@
   color: #dc2626;
 }
 
+.status-icon.needs-cleaning {
+  background: #fef3c7;
+  color: #d97706;
+}
+
 /* META */
 .meta {
   font-size: 14px;
@@ -114,6 +120,10 @@
   background: #ef4444;
 }
 
+.progress.needs-cleaning {
+  background: #f59e0b;
+}
+
 /* BADGE */
 .status-badge {
   display: inline-block;
@@ -131,6 +141,11 @@
 .status-badge.dirty {
   background: #fee2e2;
   color: #dc2626;
+}
+
+.status-badge.needs-cleaning {
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .modal-overlay {

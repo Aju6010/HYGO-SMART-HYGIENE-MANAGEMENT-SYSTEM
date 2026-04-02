@@ -12,7 +12,7 @@ export default function StaffManagement() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff")
+    fetch("/api/staff")
       .then((res) => res.json())
       .then((data) => setStaff(data))
       .catch((err) => console.error("Error fetching staff:", err));
@@ -63,7 +63,7 @@ const handleSubmit = async () => {
       return;
     }
     setLoading(true);
-    const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff", {
+    const res = await fetch("/api/staff", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

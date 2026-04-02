@@ -16,17 +16,17 @@ function Dashboard() {
  const fetchData = ( ) => { 
      console.log("REFRESH CLICKED");  
   // Alerts
-  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/cleaning-alerts")
+  fetch("/api/cleaning-alerts")
     .then(res => res.json())
     .then(data => setAlerts(data));
 
   // Toilets
-  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets")
+  fetch("/api/toilets")
     .then(res => res.json())
     .then(data => setToilets(data));
 
     //  (AI prediction)
-  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/predict-from-db")
+  fetch("/api/predict-from-db")
     .then(res => res.json())
     .then(data => setPredictions(data))
     .catch(err => console.log("Prediction error:", err));
@@ -76,13 +76,14 @@ console.log("API DATA:", toilets);
 const cleanCount = predictions.filter(t => t.status.toLowerCase() === "clean").length;
 const moderateCount = predictions.filter(t => t.status.toLowerCase() === "moderate").length;
 const dirtyCount = predictions.filter(t => t.status.toLowerCase() === "dirty" || t.status.toLowerCase() === "dirty soon").length;
+const pendingCount = predictions.filter(t => t.status.toLowerCase() === "data pending").length;
 
 const pieData = {
-  labels: ["Clean", "Moderate", "Dirty"],
+  labels: ["Clean", "Moderate", "Dirty", "Pending"],
   datasets: [
     {
-      data: [cleanCount, moderateCount, dirtyCount],
-      backgroundColor: ["#38bdf8", "#facc15", "#f87171"],
+      data: [cleanCount, moderateCount, dirtyCount, pendingCount],
+      backgroundColor: ["#38bdf8", "#facc15", "#f87171", "#cbd5e1"],
     },
   ],
 };
@@ -201,15 +202,17 @@ const pieData = {
       <div 
          key={index} 
          className={`alert-card ${
-          item.status==="Dirty Soon" ? 
+          item.status.toLowerCase() === "dirty" || item.status.toLowerCase() === "dirty soon" ? 
           "critical" : 
-          item.status==="Moderate" ? 
+          item.status.toLowerCase() === "moderate" ? 
           "warning" : 
+          item.status.toLowerCase() === "data pending" ?
+          "pending" :
             "safe"}`}>
 
         <div className="alert-left">
           <strong>Toilet {item.toilet_id}</strong>
-          <p>Next cleaning in {item.predicted_minutes} mins</p>
+          <p>{item.status === "data pending" ? "Waiting for sensor check-in..." : `Next cleaning in ${item.predicted_minutes} mins`}</p>
         </div>
 
         <div className="alert-right">

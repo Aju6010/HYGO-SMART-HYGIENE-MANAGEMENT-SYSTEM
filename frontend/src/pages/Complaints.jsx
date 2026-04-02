@@ -11,7 +11,7 @@ const Complaints = () => {
 
   const fetchComplaints = () => {
 
-    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/complaints")
+    fetch("/api/complaints")
       .then(res => res.json())
       .then(data => {
         setRecentComplaints(data);
@@ -46,7 +46,7 @@ const Complaints = () => {
     }
 
     const staffId = localStorage.getItem("staff_id");
-    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/complaints", {
+    fetch("/api/complaints", {
 
       method: "POST",
 

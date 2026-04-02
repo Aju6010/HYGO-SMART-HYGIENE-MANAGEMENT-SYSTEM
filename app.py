@@ -108,15 +108,15 @@ def cleaning_alerts():
     alerts = []
 
     cursor.execute("""
-        SELECT s1.toilet_id, s1.odour_level, s1.usage_count, t.location
-        FROM sensor_data s1
-        LEFT JOIN toilet t ON s1.toilet_id = t.toilet_id
-        WHERE s1.timestamp = (
+        SELECT t.toilet_id, s1.odour_level, s1.usage_count, t.location
+        FROM toilet t
+        LEFT JOIN sensor_data s1 ON t.toilet_id = s1.toilet_id
+        AND s1.timestamp = (
             SELECT MAX(timestamp)
             FROM sensor_data s2
             WHERE s1.toilet_id = s2.toilet_id
         )
-        ORDER BY s1.timestamp DESC
+        ORDER BY t.toilet_id ASC
     """)
 
     sensor_rows = cursor.fetchall()
@@ -275,6 +275,7 @@ SELECT
     CASE 
         WHEN s1.odour_level > 2.5 THEN 'dirty'
         WHEN s1.odour_level > 1.2 THEN 'moderate'
+        WHEN t.last_cleaned_time < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR t.last_cleaned_time IS NULL THEN 'needs cleaning'
         WHEN s1.odour_level IS NOT NULL THEN 'clean'
         ELSE COALESCE(LOWER(t.status), 'online')
     END AS status,
@@ -722,15 +723,16 @@ def predict_from_db():
 
     db, cursor = get_cursor()
 
-    # ✅ Get latest sensor data AND last cleaning time for each toilet
+    # ✅ Get all toilets and their latest sensor data
     query = """
     SELECT 
-        s1.toilet_id,
+        t.toilet_id,
         s1.usage_count,
         s1.odour_level,
-        (SELECT MAX(cleaned_time) FROM cleaning_log WHERE toilet_id = s1.toilet_id) as last_cleaned
-    FROM sensor_data s1
-    WHERE s1.timestamp = (
+        (SELECT MAX(cleaned_time) FROM cleaning_log WHERE toilet_id = t.toilet_id) as last_cleaned
+    FROM toilet t
+    LEFT JOIN sensor_data s1 ON t.toilet_id = s1.toilet_id
+    AND s1.timestamp = (
         SELECT MAX(timestamp) 
         FROM sensor_data s2 
         WHERE s1.toilet_id = s2.toilet_id
@@ -745,32 +747,38 @@ def predict_from_db():
     for row in rows:
         toilet_id = row["toilet_id"]
         last_cleaned_time = row["last_cleaned"]
+        odour_level = row["odour_level"]
+
+        # Default for toilets without sensor data
+        if odour_level is None:
+            results.append({
+                "toilet_id": toilet_id,
+                "predicted_minutes": 0,
+                "status": "data pending",
+                "usage_count": 0,
+                "cleanliness_score": 0
+            })
+            continue
 
         # Default if never cleaned
         if not last_cleaned_time:
             last_cleaned_time = datetime.now() - timedelta(hours=24)
 
-        # ⏱ time since cleaned (hours)
-        hours_since_clean = (
-            datetime.now() - last_cleaned_time
-        ).total_seconds() / 3600
-
+        hours_since_clean = (datetime.now() - last_cleaned_time).total_seconds() / 3600
         usage_count = row["usage_count"] or 0
         time_of_day = datetime.now().hour
 
-        # 🤖 model input
         features = np.array([[usage_count, time_of_day, hours_since_clean]])
 
         try:
             prediction = model.predict(features)[0]
         except:
-            prediction = 30  # fallback
+            prediction = 30 
 
-        # 🎯 convert to status and score
-        if row["odour_level"] > 2.5:
+        if odour_level > 2.5:
             status = "dirty"
             score = 30
-        elif row["odour_level"] > 1.2:
+        elif odour_level > 1.2:
             status = "moderate"
             score = 60
         else:

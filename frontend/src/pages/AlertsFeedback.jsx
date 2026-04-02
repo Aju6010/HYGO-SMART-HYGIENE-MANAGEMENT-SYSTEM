@@ -25,7 +25,7 @@ export default function AlertsFeedback() {
 
   const loadData = async () => {
     try {
-      const alertRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/alerts");
+      const alertRes = await fetch("/api/alerts");
       const alertData = await alertRes.json();
       setAlerts(alertData || []);
     } catch (error) {
@@ -33,7 +33,7 @@ export default function AlertsFeedback() {
     }
 
     try {
-      const feedbackRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/feedback");
+      const feedbackRes = await fetch("/api/feedback");
       const feedbackData = await feedbackRes.json();
       setFeedback(feedbackData || []);
     } catch (error) {
@@ -41,7 +41,7 @@ export default function AlertsFeedback() {
     }
 
     try {
-      const staffRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff");
+      const staffRes = await fetch("/api/staff");
       const staffData = await staffRes.json();
       setStaff(staffData || []);
     } catch (error) {
@@ -57,7 +57,7 @@ export default function AlertsFeedback() {
     if (!selectedStaff) return alert("Please select a staff member");
 
     try {
-      const response = await fetch(`https://hygo-smart-hygiene-management-system.onrender.com/api/alerts/${alertId}/assign`, {
+      const response = await fetch(`/api/alerts/${alertId}/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -79,7 +79,7 @@ export default function AlertsFeedback() {
   const handleCreateAlert = async () => {
     if (!newAlert.toilet || !newAlert.message) return;
     try {
-      await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/alerts", {
+      await fetch("/api/alerts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAlert),

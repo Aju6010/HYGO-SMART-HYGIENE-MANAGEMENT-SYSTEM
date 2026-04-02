@@ -10,7 +10,7 @@ const ProfileView = () => {
 
     const staffId = localStorage.getItem("staff_id");
 
-fetch(`https://hygo-smart-hygiene-management-system.onrender.com/api/staff/profile/${staffId}`)
+fetch(`/api/staff/profile/${staffId}`)
     .then(res=>res.json())
     .then(data=>{
       setProfile(data);

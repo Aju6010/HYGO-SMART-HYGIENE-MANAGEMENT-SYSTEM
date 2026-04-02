@@ -10,7 +10,7 @@ const AssignedTasks = () => {
 
     const staffId = localStorage.getItem("staff_id");
 
-fetch(`https://hygo-smart-hygiene-management-system.onrender.com/api/staff/assigned-tasks/${staffId}`)
+fetch(`/api/staff/assigned-tasks/${staffId}`)
 
       .then((res) => {
 

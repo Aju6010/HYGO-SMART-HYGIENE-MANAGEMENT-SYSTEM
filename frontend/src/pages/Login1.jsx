@@ -18,7 +18,7 @@ const password = e.target.password.value;
 
 try {
 
-  const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/login", {
+  const res = await fetch("/api/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

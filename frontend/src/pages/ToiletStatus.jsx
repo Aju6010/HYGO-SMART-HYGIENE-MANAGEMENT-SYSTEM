@@ -6,7 +6,7 @@ export default function ToiletStatus() {
   const [toilets, setToilets] = useState([]);
 
   useEffect(() => {
-    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets")
+    fetch("/api/toilets")
       .then((res) => res.json())
       .then((data) => setToilets(data))
       .catch((err) => console.error("Error fetching toilets:", err));
@@ -15,6 +15,7 @@ export default function ToiletStatus() {
   // SUMMARY COUNTS
   const clean = toilets.filter((t) => t.status === "clean").length;
   const dirty = toilets.filter((t) => t.status === "dirty").length;
+  const needsCleaningCount = toilets.filter((t) => t.status === "needs cleaning").length;
   const maintenance = toilets.filter((t) => t.status === "maintenance").length;
   const offline = toilets.filter((t) => t.status === "offline").length;
 
@@ -23,6 +24,7 @@ export default function ToiletStatus() {
     if (status === "clean") return 90;
     if (status === "dirty") return 40;
     if (status === "maintenance") return 60;
+    if (status === "needs cleaning") return 50;
     return 0;
   };
   const [search, setSearch] = useState("");
@@ -49,7 +51,7 @@ export default function ToiletStatus() {
       return;
     }
 
-    const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets", {
+    const res = await fetch("/api/toilets", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -114,9 +116,14 @@ const filteredToilets = toilets.filter((t) => {
             <p>Clean</p>
           </div>
 
+          <div className="summary-card needs-cleaning">
+            <h2>{needsCleaningCount}</h2>
+            <p>Needs Cleaning</p>
+          </div>
+
           <div className="summary-card dirty">
             <h2>{dirty}</h2>
-            <p>Dirty</p>
+            <p>Dirty/Alert</p>
           </div>
 
           <div className="summary-card maintenance">
@@ -144,7 +151,7 @@ const filteredToilets = toilets.filter((t) => {
             return (
               <div className="toilet-card" key={t.toilet_id}>
                 <div className={`status-icon ${t.status}`}>
-                  {t.status === "clean" ? "✨" : "💧"}
+                  {t.status === "clean" ? "✨" : t.status === "dirty" ? "💧" : t.status === "needs cleaning" ? "⏳" : "⚠️"}
                 </div>
 
                 <h3>T-{String(t.toilet_id).padStart(3, "0")}</h3>

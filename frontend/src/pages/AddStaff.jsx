@@ -12,7 +12,7 @@ export default function AddStaff() {
     e.preventDefault();
 
     try {
-      const res = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff", {
+      const res = await fetch("/api/staff", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
