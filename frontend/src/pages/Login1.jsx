@@ -28,12 +28,17 @@ try {
       password: password
     })
   });
-  console.log("updated");
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Server Error:", errorText);
+    alert("Login failed. Please check credentials or contact admin.");
+    return;
+  }
 
   const data = await res.json();
 
   if (!data.success) {
-    alert("Invalid username or password");
+    alert(data.message || "Invalid username or password");
     return;
   }
 

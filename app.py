@@ -76,11 +76,14 @@ def login():
         })
 
     # -------- STAFF LOGIN --------
+    safe_username = (username or "").strip()
+    safe_password = (password or "").strip()
+
     cursor.execute("""
         SELECT staff_id
         FROM staff
         WHERE TRIM(username)=%s AND TRIM(password)=%s
-    """, (username.strip(), password.strip()))
+    """, (safe_username, safe_password))
 
     staff = cursor.fetchone()
 
