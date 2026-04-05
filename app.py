@@ -53,8 +53,11 @@ def test():
 # --------------------
 @app.route("/api/login", methods=["POST"])
 def login():
+    db = None
     try:
         data = request.json
+        print(f"DEBUG: Login attempt for user: {data.get('username')}")
+
         if not data:
             return jsonify({"success": False, "message": "No data received"}), 400
 
@@ -63,54 +66,34 @@ def login():
 
         db, cursor = get_cursor()
 
-        # -------- ADMIN LOGIN (UNCHANGED) --------
-        cursor.execute("""
-            SELECT role
-            FROM users
-            WHERE username=%s AND password=%s
-        """, (username, password))
-
+        # Check ADMIN
+        cursor.execute("SELECT role FROM users WHERE username=%s AND password=%s", (username, password))
         admin = cursor.fetchone()
 
         if admin:
-            db.close()
-            return jsonify({
-                "success": True,
-                "role": "admin"
-            })
+            print("DEBUG: Admin login successful")
+            return jsonify({"success": True, "role": "admin"})
 
-        # -------- STAFF LOGIN --------
+        # Check STAFF
         safe_username = (username or "").strip()
         safe_password = (password or "").strip()
 
-        cursor.execute("""
-            SELECT staff_id
-            FROM staff
-            WHERE TRIM(username)=%s AND TRIM(password)=%s
-        """, (safe_username, safe_password))
-
+        cursor.execute("SELECT staff_id FROM staff WHERE TRIM(username)=%s AND TRIM(password)=%s", (safe_username, safe_password))
         staff = cursor.fetchone()
-        db.close()
 
         if staff:
-            return jsonify({
-                "success": True,
-                "role": "staff",
-                "staff_id": staff["staff_id"]
-            })
+            print(f"DEBUG: Staff login successful for ID: {staff['staff_id']}")
+            return jsonify({"success": True, "role": "staff", "staff_id": staff["staff_id"]})
 
-        # -------- LOGIN FAILED --------
-        return jsonify({
-            "success": False,
-            "message": "Invalid username or password"
-        }), 401
+        print("DEBUG: Login failed - invalid credentials")
+        return jsonify({"success": False, "message": "Invalid username or password"}), 401
 
     except Exception as e:
-        print(f"LOGIN ERROR: {str(e)}")
-        return jsonify({
-            "success": False, 
-            "message": f"Database or Server Error: {str(e)}"
-        }), 500
+        print(f"DEBUG: LOGIN ERROR: {str(e)}")
+        return jsonify({"success": False, "message": f"Server Error: {str(e)}"}), 500
+    finally:
+        if db:
+            db.close()
 
 
 # --------------------
@@ -118,85 +101,95 @@ def login():
 # --------------------
 @app.route("/api/cleaning-alerts")
 def cleaning_alerts():
-
-    db, cursor = get_cursor()
-    alerts = []
-
-    cursor.execute("""
-        SELECT t.toilet_id, s1.odour_level, s1.usage_count, s1.status as sensor_status, t.location
-        FROM toilet t
-        LEFT JOIN sensor_data s1 ON t.toilet_id = s1.toilet_id
-        AND s1.timestamp = (
-            SELECT MAX(timestamp)
-            FROM sensor_data s2
-            WHERE s1.toilet_id = s2.toilet_id
-        )
-        ORDER BY t.toilet_id ASC
-    """)
-
-    sensor_rows = cursor.fetchall()
-
-    alerts_dict = {}
-
-    for row in sensor_rows:
-        tid = row["toilet_id"]
-        s_status = (row["sensor_status"] or "").lower()
+    db = None
+    try:
+        db, cursor = get_cursor()
         
-        # Combine if BOTH are true, else pick one
-        if (row["odour_level"] > ODOUR_THRESHOLD_DIRTY or s_status == "dirty") and row["usage_count"] > USAGE_THRESHOLD:
-            alerts_dict[tid] = {
-                "toilet_id": tid,
-                "location": row["location"],
-                "type": "URGENT_CLEANING",
-                "message": "High odour/status and usage detected. Cleaning required."
-            }
-        elif row["odour_level"] > ODOUR_THRESHOLD_DIRTY or s_status == "dirty":
-            alerts_dict[tid] = {
-                "toilet_id": tid,
-                "location": row["location"],
-                "type": "HIGH_ODOUR",
-                "message": "High odour or dirty status detected. Cleaning required."
-            }
-        elif row["odour_level"] > ODOUR_THRESHOLD_MODERATE or s_status == "moderate":
-            alerts_dict[tid] = {
-                "toilet_id": tid,
-                "location": row["location"],
-                "type": "MODERATE_ODOUR",
-                "message": "Moderate odour or status detected. Consider inspection."
-            }
-        elif row["usage_count"] > USAGE_THRESHOLD:
-            alerts_dict[tid] = {
-                "toilet_id": tid,
-                "location": row["location"],
-                "type": "HIGH_USAGE",
-                "message": "High usage detected. Cleaning required."
-            }
+        cursor.execute("""
+            SELECT t.toilet_id, s1.odour_level, s1.usage_count, s1.status as sensor_status, t.location
+            FROM toilet t
+            LEFT JOIN sensor_data s1 ON t.toilet_id = s1.toilet_id
+            AND s1.timestamp = (
+                SELECT MAX(timestamp)
+                FROM sensor_data s2
+                WHERE s1.toilet_id = s2.toilet_id
+            )
+            ORDER BY t.toilet_id ASC
+        """)
 
-    time_limit = datetime.now() - timedelta(hours=CLEANING_TIME_LIMIT_HOURS)
+        sensor_rows = cursor.fetchall()
+        alerts_dict = {}
 
-    cursor.execute("""
-        SELECT toilet_id, location, last_cleaned_time
-        FROM toilet
-        WHERE last_cleaned_time IS NULL
-        OR last_cleaned_time < %s
-    """, (time_limit,))
+        for row in sensor_rows:
+            tid = row["toilet_id"]
+            # Default to 0/empty to prevent crashes if sensor data is missing
+            odour = row["odour_level"] or 0
+            usage = row["usage_count"] or 0
+            s_status = (row["sensor_status"] or "").lower()
+            
+            # Combine logic
+            is_dirty = (odour > ODOUR_THRESHOLD_DIRTY or s_status == "dirty")
+            is_moderate = (odour > ODOUR_THRESHOLD_MODERATE or s_status == "moderate")
+            is_high_usage = (usage > USAGE_THRESHOLD)
 
-    toilets = cursor.fetchall()
+            if is_dirty and is_high_usage:
+                alerts_dict[tid] = {
+                    "toilet_id": tid,
+                    "location": row["location"],
+                    "type": "URGENT_CLEANING",
+                    "message": "High odour/status and usage detected. Cleaning required."
+                }
+            elif is_dirty:
+                alerts_dict[tid] = {
+                    "toilet_id": tid,
+                    "location": row["location"],
+                    "type": "HIGH_ODOUR",
+                    "message": "High odour or dirty status detected. Cleaning required."
+                }
+            elif is_moderate:
+                alerts_dict[tid] = {
+                    "toilet_id": tid,
+                    "location": row["location"],
+                    "type": "MODERATE_ODOUR",
+                    "message": "Moderate odour or status detected. Consider inspection."
+                }
+            elif is_high_usage:
+                alerts_dict[tid] = {
+                    "toilet_id": tid,
+                    "location": row["location"],
+                    "type": "HIGH_USAGE",
+                    "message": "High usage detected. Cleaning required."
+                }
 
-    for t in toilets:
-        tid = t["toilet_id"]
-        # Only add 'NOT_CLEANED' alert if there wasn't already a sensor alert for it
-        if tid not in alerts_dict:
-            alerts_dict[tid] = {
-                "toilet_id": tid,
-                "location": t["location"],
-                "type": "NOT_CLEANED",
-                "message": "Toilet not cleaned for a long time."
-            }
+        # Check for time-based alerts
+        time_limit = datetime.now() - timedelta(hours=CLEANING_TIME_LIMIT_HOURS)
+        cursor.execute("""
+            SELECT toilet_id, location, last_cleaned_time
+            FROM toilet
+            WHERE last_cleaned_time IS NULL
+            OR last_cleaned_time < %s
+        """, (time_limit,))
 
-    alerts = list(alerts_dict.values())
+        toilets = cursor.fetchall()
 
-    return jsonify(alerts)
+        for t in toilets:
+            tid = t["toilet_id"]
+            if tid not in alerts_dict:
+                alerts_dict[tid] = {
+                    "toilet_id": tid,
+                    "location": t["location"],
+                    "type": "NOT_CLEANED",
+                    "message": "Toilet not cleaned for a long time."
+                }
+
+        return jsonify(list(alerts_dict.values()))
+
+    except Exception as e:
+        print(f"DEBUG: ALERTS ERROR: {str(e)}")
+        return jsonify([]) # Return empty list on error to keep UI from crashing
+    finally:
+        if db:
+            db.close()
 
 
 # --------------------

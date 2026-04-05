@@ -28,14 +28,25 @@ try {
       password: password
     })
   });
+  console.log("Response Status:", res.status);
+
   if (!res.ok) {
     const errorText = await res.text();
-    console.error("Server Error:", errorText);
-    alert("Login failed. Please check credentials or contact admin.");
+    console.error("Server Error Response:", errorText);
+    alert(`Login failed (Status ${res.status}). Please check credentials.`);
     return;
   }
 
-  const data = await res.json();
+  const rawText = await res.text();
+  console.log("Raw Response Body:", rawText);
+
+  if (!rawText || rawText.trim() === "") {
+    console.error("Empty response received from server");
+    alert("Server error: Empty response. Please check if your backend is running.");
+    return;
+  }
+
+  const data = JSON.parse(rawText);
 
   if (!data.success) {
     alert(data.message || "Invalid username or password");

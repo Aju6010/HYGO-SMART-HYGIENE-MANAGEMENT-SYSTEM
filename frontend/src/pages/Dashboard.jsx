@@ -37,9 +37,15 @@ function Dashboard() {
     fetchData();
   }, [])
 
+// ===== KPI CALCULATIONS =====
 const total = toilets.length;
-const dirty = alerts.length;
-const clean = total - dirty;
+// Dirty = Sensor alerts (High Odour / Urgent)
+const dirty = alerts.filter(a => a.type === "HIGH_ODOUR" || a.type === "URGENT_CLEANING").length;
+// Needs Attention = Maintenance alerts (Not Cleaned / High Usage)
+const needsAttention = alerts.filter(a => a.type === "NOT_CLEANED" || a.type === "HIGH_USAGE" || a.type === "MODERATE_ODOUR").length;
+// Clean = Everything else
+const clean = total - (dirty + needsAttention);
+const resolved = 0; // Coming from cleaning_log soon
 
 
 // ===== DYNAMIC DATA =====
@@ -132,17 +138,16 @@ const pieData = {
             <div className="card-content">
               <p className="card-title">Dirty Toilets</p>
               <h2>{dirty}</h2>
-              <span className="card-sub danger">Needs attention</span>
+              <span className="card-sub danger">Action required</span>
             </div>
             <div className="card-icon red">💧</div>
           </div>
 
           <div className="card card-yellow">
             <div className="card-content">
-              <p className="card-title">Active Alerts</p>
-              {/* 🔥 LIVE ALERT COUNT FROM DB */}
-              <h2>{alerts.length}</h2>
-              <span className="card-sub">Requires action</span>
+              <p className="card-title">Needs Attention</p>
+              <h2>{needsAttention}</h2>
+              <span className="card-sub">Overdue cleaning</span>
             </div>
             <div className="card-icon yellow">⚠️</div>
           </div>
