@@ -108,7 +108,7 @@ def cleaning_alerts():
     alerts = []
 
     cursor.execute("""
-        SELECT t.toilet_id, s1.odour_level, s1.usage_count, t.location
+        SELECT t.toilet_id, s1.odour_level, s1.usage_count, s1.status as sensor_status, t.location
         FROM toilet t
         LEFT JOIN sensor_data s1 ON t.toilet_id = s1.toilet_id
         AND s1.timestamp = (
@@ -125,28 +125,29 @@ def cleaning_alerts():
 
     for row in sensor_rows:
         tid = row["toilet_id"]
+        s_status = (row["sensor_status"] or "").lower()
         
         # Combine if BOTH are true, else pick one
-        if row["odour_level"] > ODOUR_THRESHOLD_DIRTY and row["usage_count"] > USAGE_THRESHOLD:
+        if (row["odour_level"] > ODOUR_THRESHOLD_DIRTY or s_status == "dirty") and row["usage_count"] > USAGE_THRESHOLD:
             alerts_dict[tid] = {
                 "toilet_id": tid,
                 "location": row["location"],
                 "type": "URGENT_CLEANING",
-                "message": "High odour and usage detected. Cleaning required."
+                "message": "High odour/status and usage detected. Cleaning required."
             }
-        elif row["odour_level"] > ODOUR_THRESHOLD_DIRTY:
+        elif row["odour_level"] > ODOUR_THRESHOLD_DIRTY or s_status == "dirty":
             alerts_dict[tid] = {
                 "toilet_id": tid,
                 "location": row["location"],
                 "type": "HIGH_ODOUR",
-                "message": "High odour detected. Cleaning required."
+                "message": "High odour or dirty status detected. Cleaning required."
             }
-        elif row["odour_level"] > ODOUR_THRESHOLD_MODERATE:
+        elif row["odour_level"] > ODOUR_THRESHOLD_MODERATE or s_status == "moderate":
             alerts_dict[tid] = {
                 "toilet_id": tid,
                 "location": row["location"],
                 "type": "MODERATE_ODOUR",
-                "message": "Moderate odour detected. Consider inspection."
+                "message": "Moderate odour or status detected. Consider inspection."
             }
         elif row["usage_count"] > USAGE_THRESHOLD:
             alerts_dict[tid] = {
@@ -273,8 +274,8 @@ SELECT
     t.toilet_id,
     t.location,
     CASE 
-        WHEN s1.odour_level > 2.5 THEN 'dirty'
-        WHEN s1.odour_level > 1.2 THEN 'moderate'
+        WHEN s1.odour_level > 2.5 OR LOWER(s1.status) = 'dirty' THEN 'dirty'
+        WHEN s1.odour_level > 1.2 OR LOWER(s1.status) = 'moderate' THEN 'moderate'
         WHEN t.last_cleaned_time < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR t.last_cleaned_time IS NULL THEN 'needs cleaning'
         WHEN s1.odour_level IS NOT NULL THEN 'clean'
         ELSE COALESCE(LOWER(t.status), 'online')
@@ -729,6 +730,7 @@ def predict_from_db():
         t.toilet_id,
         s1.usage_count,
         s1.odour_level,
+        s1.status as sensor_status,
         (SELECT MAX(cleaned_time) FROM cleaning_log WHERE toilet_id = t.toilet_id) as last_cleaned
     FROM toilet t
     LEFT JOIN sensor_data s1 ON t.toilet_id = s1.toilet_id
@@ -748,6 +750,7 @@ def predict_from_db():
         toilet_id = row["toilet_id"]
         last_cleaned_time = row["last_cleaned"]
         odour_level = row["odour_level"]
+        sensor_status = row.get("sensor_status")
 
         # Default for toilets without sensor data
         if odour_level is None:
@@ -775,10 +778,12 @@ def predict_from_db():
         except:
             prediction = 30 
 
-        if odour_level > 2.5:
+        # Logic: High Odour OR Sensor explicitly says Dirty
+        if odour_level > 2.5 or (sensor_status and sensor_status.lower() == "dirty"):
             status = "dirty"
             score = 30
-        elif odour_level > 1.2:
+        # Moderate Odour OR Sensor explicitly says Moderate
+        elif odour_level > 1.2 or (sensor_status and sensor_status.lower() == "moderate"):
             status = "moderate"
             score = 60
         else:
