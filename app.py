@@ -53,52 +53,64 @@ def test():
 # --------------------
 @app.route("/api/login", methods=["POST"])
 def login():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data received"}), 400
 
-    data = request.json
-    username = data.get("username")
-    password = data.get("password")
+        username = data.get("username")
+        password = data.get("password")
 
-    db, cursor = get_cursor()
+        db, cursor = get_cursor()
 
-    # -------- ADMIN LOGIN (UNCHANGED) --------
-    cursor.execute("""
-        SELECT role
-        FROM users
-        WHERE username=%s AND password=%s
-    """, (username, password))
+        # -------- ADMIN LOGIN (UNCHANGED) --------
+        cursor.execute("""
+            SELECT role
+            FROM users
+            WHERE username=%s AND password=%s
+        """, (username, password))
 
-    admin = cursor.fetchone()
+        admin = cursor.fetchone()
 
-    if admin:
+        if admin:
+            db.close()
+            return jsonify({
+                "success": True,
+                "role": "admin"
+            })
+
+        # -------- STAFF LOGIN --------
+        safe_username = (username or "").strip()
+        safe_password = (password or "").strip()
+
+        cursor.execute("""
+            SELECT staff_id
+            FROM staff
+            WHERE TRIM(username)=%s AND TRIM(password)=%s
+        """, (safe_username, safe_password))
+
+        staff = cursor.fetchone()
+        db.close()
+
+        if staff:
+            return jsonify({
+                "success": True,
+                "role": "staff",
+                "staff_id": staff["staff_id"]
+            })
+
+        # -------- LOGIN FAILED --------
         return jsonify({
-            "success": True,
-            "role": "admin"
-        })
+            "success": False,
+            "message": "Invalid username or password"
+        }), 401
 
-    # -------- STAFF LOGIN --------
-    safe_username = (username or "").strip()
-    safe_password = (password or "").strip()
-
-    cursor.execute("""
-        SELECT staff_id
-        FROM staff
-        WHERE TRIM(username)=%s AND TRIM(password)=%s
-    """, (safe_username, safe_password))
-
-    staff = cursor.fetchone()
-
-    if staff:
+    except Exception as e:
+        print(f"LOGIN ERROR: {str(e)}")
         return jsonify({
-            "success": True,
-            "role": "staff",
-            "staff_id": staff["staff_id"]
-        })
-
-    # -------- LOGIN FAILED --------
-    return jsonify({
-        "success": False,
-        "message": "Invalid username or password"
-    }), 401
+            "success": False, 
+            "message": f"Database or Server Error: {str(e)}"
+        }), 500
 
 
 # --------------------
