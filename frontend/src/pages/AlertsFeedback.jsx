@@ -189,9 +189,22 @@ export default function AlertsFeedback() {
                         <span className="badge type-tag">{alert.type || 'Sensor'}</span>
                       </div>
                       <p className="alert-msg">{alert.message}</p>
-                      <span className="alert-time">🕒 {alert.time}</span>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <span className="alert-time">🕒 {alert.time}</span>
+                        {alert.assigned_staff_name && (
+                          <span style={{ fontSize: "12px", color: "#6366f1", fontWeight: "600", background: "#eef2ff", padding: "2px 8px", borderRadius: "4px" }}>
+                            👤 Designated: {alert.assigned_staff_name}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <button className="action-btn" onClick={() => setAssigningAlertId(alert.id)}>Acknowledge</button>
+                    {alert.status?.toLowerCase() === "open" ? (
+                      <button className="action-btn" onClick={() => setAssigningAlertId(alert.id)}>Acknowledge</button>
+                    ) : (
+                      <span className="badge status-acknowledged" style={{ padding: "8px 12px", background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0", borderRadius: "6px", fontWeight: "600" }}>
+                        Assigned ✔
+                      </span>
+                    )}
                   </div>
 
                   {/* Fixed Staff Dropdown overlay format */}

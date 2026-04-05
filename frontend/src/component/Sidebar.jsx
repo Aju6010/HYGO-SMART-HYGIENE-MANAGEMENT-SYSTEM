@@ -1,6 +1,14 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  };
   return (
     <div className="side">
       <div className="side_header">
@@ -51,6 +59,24 @@ export default function Sidebar() {
       >
         Reports
       </NavLink>
+
+      <button 
+        onClick={handleLogout}
+        className="nav-btn" 
+        style={{ 
+          width: "100%", 
+          textAlign: "left", 
+          border: "none", 
+          background: "none", 
+          cursor: "pointer", 
+          color: "#ef4444", 
+          fontWeight: "bold",
+          marginTop: "20px",
+          padding: "10px 16px"
+        }}
+      >
+        Logout ⎋
+      </button>
     </div>
   );
 }

@@ -161,14 +161,21 @@ def cleaning_alerts():
                     "message": "High usage detected. Cleaning required."
                 }
 
-        # Check for time-based alerts
+        # Check for time-based alerts (Routine maintenance)
+        # We only flag 'Overdue' if the toilet isn't already reported as 'Clean' by sensors
         time_limit = datetime.now() - timedelta(hours=CLEANING_TIME_LIMIT_HOURS)
         cursor.execute("""
-            SELECT toilet_id, location, last_cleaned_time
-            FROM toilet
-            WHERE last_cleaned_time IS NULL
-            OR last_cleaned_time < %s
-        """, (time_limit,))
+            SELECT t.toilet_id, t.location, t.last_cleaned_time
+            FROM toilet t
+            LEFT JOIN sensor_data s1 ON t.toilet_id = s1.toilet_id
+            AND s1.timestamp = (
+                SELECT MAX(timestamp)
+                FROM sensor_data s2
+                WHERE s1.toilet_id = s2.toilet_id
+            )
+            WHERE (t.last_cleaned_time IS NULL OR t.last_cleaned_time < %s)
+            AND (s1.odour_level IS NULL OR s1.odour_level > %s OR s1.status != 'clean')
+        """, (time_limit, ODOUR_THRESHOLD_MODERATE))
 
         toilets = cursor.fetchall()
 
@@ -284,7 +291,8 @@ SELECT
     CASE 
         WHEN s1.odour_level > 2.5 OR LOWER(s1.status) = 'dirty' THEN 'dirty'
         WHEN s1.odour_level > 1.2 OR LOWER(s1.status) = 'moderate' THEN 'moderate'
-        WHEN t.last_cleaned_time < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR t.last_cleaned_time IS NULL THEN 'needs cleaning'
+        WHEN (t.last_cleaned_time < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR t.last_cleaned_time IS NULL) 
+             AND (s1.odour_level IS NULL OR s1.odour_level > 1.2 OR s1.status != 'clean') THEN 'needs cleaning'
         WHEN s1.odour_level IS NOT NULL THEN 'clean'
         ELSE COALESCE(LOWER(t.status), 'online')
     END AS status,
@@ -340,45 +348,63 @@ AND s1.timestamp = (
 # --------------------
 @app.route("/api/alerts")
 def get_alerts():
+    db = None
+    try:
+        db, cursor = get_cursor()
 
-    db, cursor = get_cursor()
+        # Join with toilet and cleaning_log to see if there's a 'Pending' assignment
+        query = """
+        SELECT 
+            CONCAT('T-', s1.toilet_id) AS id,
+            s1.toilet_id,
 
-    query = """
-    SELECT 
-        CONCAT('T-', toilet_id) AS id,
+            CASE 
+                WHEN s1.odour_level > 2.5 THEN 'critical'
+                WHEN s1.usage_count > 30 THEN 'medium'
+                ELSE 'low'
+            END AS severity,
 
-        CASE 
-            WHEN odour_level > 2.5 THEN 'critical'
-            WHEN usage_count > 30 THEN 'medium'
-            ELSE 'low'
-        END AS severity,
+            CASE
+                WHEN c.attendance_status = 'Assigned' THEN 'Acknowledged'
+                WHEN c.attendance_status = 'Completed' THEN 'Resolved'
+                ELSE 'Open'
+            END AS status,
 
-        'Open' AS status,
-        'Sensor' AS type,
+            'Sensor' AS type,
 
-        CONCAT('Odour level ', odour_level,
-               ', usage ', usage_count) AS message,
+            CONCAT('Odour level ', s1.odour_level,
+                   ', usage ', s1.usage_count) AS message,
 
-        DATE_FORMAT(timestamp,'%b %d, %H:%i') AS time
+            DATE_FORMAT(s1.timestamp,'%b %d, %H:%i') AS time,
+            st.name AS assigned_staff_name
 
-    FROM sensor_data s1
+        FROM sensor_data s1
+        JOIN toilet t ON s1.toilet_id = t.toilet_id
+        LEFT JOIN staff st ON t.assigned_staff_id = st.staff_id
+        LEFT JOIN cleaning_log c ON s1.toilet_id = c.toilet_id 
+        AND c.cleaned_time IS NULL 
 
-    WHERE timestamp = (
-        SELECT MAX(timestamp)
-        FROM sensor_data s2
-        WHERE s1.toilet_id = s2.toilet_id
-    )
+        WHERE s1.timestamp = (
+            SELECT MAX(timestamp)
+            FROM sensor_data s2
+            WHERE s1.toilet_id = s2.toilet_id
+        )
 
-    AND (odour_level > 1.2 OR usage_count > 30)
+        AND (s1.odour_level > 1.2 OR s1.usage_count > 30)
 
-    ORDER BY timestamp DESC
-    """
+        ORDER BY s1.timestamp DESC
+        """
 
-    cursor.execute(query)
+        cursor.execute(query)
+        alerts = cursor.fetchall()
+        return jsonify(alerts)
 
-    alerts = cursor.fetchall()
-
-    return jsonify(alerts)
+    except Exception as e:
+        print(f"ALERTS API ERROR: {str(e)}")
+        return jsonify([])
+    finally:
+        if db:
+            db.close()
 
 @app.route("/api/alerts/<alert_id>/assign", methods=["POST", "OPTIONS"])
 @cross_origin()
@@ -401,6 +427,10 @@ def assign_alert(alert_id):
     db, cursor = get_cursor()
 
     try:
+        # 1. Update the designated staff for this toilet
+        cursor.execute("UPDATE toilet SET assigned_staff_id = %s WHERE toilet_id = %s", (staff_id, toilet_id))
+
+        # 2. Create the first cleaning log entry
         query = """
         INSERT INTO cleaning_log (toilet_id, staff_id, assigned_time, attendance_status, verification_status)
         VALUES (%s, %s, NOW(), 'Assigned', 'Pending')
@@ -411,6 +441,9 @@ def assign_alert(alert_id):
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+    finally:
+        if db:
+            db.close()
 
     return jsonify({"message": "Staff assigned successfully", "status": "Acknowledged"}), 200
 
@@ -811,44 +844,112 @@ def predict_from_db():
 
 @app.route("/api/data", methods=["POST"])
 def receive_sensor_data():
+    db = None
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "No data received"}), 400
 
-    data = request.json
+        gas_value = data.get("gas_value", 0)
+        gas_status = data.get("gas_status", "clean")
+        distance = data.get("distance", 0)
+        status_raw = data.get("status", "clean")
+        count = data.get("count", 0)
+        alert = data.get("alert", 0)
+        
+        # In case ESP32 sends a toilet_id, otherwise default to 10
+        toilet_id = data.get("toilet_id", 10) 
 
-    gas_value = data.get("gas_value")
-    gas_status = data.get("gas_status")
-    distance = data.get("distance")
-    status = data.get("status")
-    count = data.get("count")
-    alert = data.get("alert")
+        print(f"📡 ESP32 DATA (T-{toilet_id}):", data)
 
-    print("📡 ESP32 DATA:", data)
+        # convert gas to odour level
+        odour_level = round(gas_value / 100, 2)
+        status = status_raw.lower()
 
-    # convert gas to odour level
-    odour_level = round(gas_value / 100, 2)
-    status = (status or "clean").lower()
+        db, cursor = get_cursor()
 
-    db, cursor = get_cursor()
+        # 1. Insert sensor_data history
+        query = """
+        INSERT INTO sensor_data 
+        (toilet_id, odour_level, usage_count, gas_value, gas_status, distance, status, alert, timestamp)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,NOW())
+        """
+        cursor.execute(query, (
+            toilet_id,
+            odour_level,
+            count,
+            gas_value,
+            gas_status,
+            distance,
+            status,
+            alert
+        ))
 
-    query = """
-    INSERT INTO sensor_data 
-    (toilet_id, odour_level, usage_count, gas_value, gas_status, distance, status, alert, timestamp)
-    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,NOW())
-    """
+        # 2. Automated Cleaning Logic: Dirty Detection & Auto-Task Creation
+        # If toilet becomes dirty, check who is assigned and create a log task
+        if odour_level >= ODOUR_THRESHOLD_DIRTY or status == "dirty":
+            
+            # Check if there is an assigned staff for this toilet
+            cursor.execute("SELECT assigned_staff_id FROM toilet WHERE toilet_id = %s", (toilet_id,))
+            toilet_info = cursor.fetchone()
+            
+            if toilet_info and toilet_info["assigned_staff_id"]:
+                staff_id = toilet_info["assigned_staff_id"]
+                
+                # Check if there is already an active (Assigned/Pending) log to avoid duplicates
+                cursor.execute("""
+                    SELECT log_id FROM cleaning_log 
+                    WHERE toilet_id = %s AND staff_id = %s AND attendance_status = 'Assigned'
+                """, (toilet_id, staff_id))
+                
+                if not cursor.fetchone():
+                    print(f"🚨 AUTO-TASK: Toilet T-{toilet_id} is DIRTY. Assigning to Staff #{staff_id}")
+                    cursor.execute("""
+                        INSERT INTO cleaning_log (toilet_id, staff_id, assigned_time, attendance_status, verification_status)
+                        VALUES (%s, %s, NOW(), 'Assigned', 'Pending')
+                    """, (toilet_id, staff_id))
 
-    cursor.execute(query, (
-        10,                # toilet_id
-        odour_level,
-        count,
-        gas_value,
-        gas_status,
-        distance,
-        status,
-        alert
-    ))
+        # 3. Automated Cleaning Logic: Clean Detection & Auto-Verification
+        # If toilet is now clean, reset the timer and check for assignments to close them
+        if odour_level < ODOUR_THRESHOLD_MODERATE and status == "clean":
+            
+            # 🔥 ALWAYS update Toilet registry to sync 'Last Cleaned' timer
+            cursor.execute("UPDATE toilet SET last_cleaned_time = NOW() WHERE toilet_id = %s", (toilet_id,))
+            print(f"✨ SMART RESET: Timer reset for T-{toilet_id}")
 
-    db.commit()
+            # Check for the most recent 'Pending' log to auto-verify staff work
+            cursor.execute("""
+                SELECT log_id FROM cleaning_log 
+                WHERE toilet_id = %s AND verification_status = 'Pending'
+                ORDER BY log_id DESC LIMIT 1
+            """, (toilet_id,))
+            
+            pending_log = cursor.fetchone()
+            
+            if pending_log:
+                log_id = pending_log["log_id"]
+                print(f"✅ AUTO-VERIFY: Closing Log #{log_id} for T-{toilet_id}")
+                
+                # Update Cleaning Log to 'Completed' and 'Verified'
+                cursor.execute("""
+                    UPDATE cleaning_log 
+                    SET attendance_status = 'Completed', 
+                        verification_status = 'Verified', 
+                        cleaned_time = NOW() 
+                    WHERE log_id = %s
+                """, (log_id,))
 
-    return jsonify({"message": "Data stored successfully"})
+        db.commit()
+        return jsonify({"message": "Data received and verified"}), 200
+
+    except Exception as e:
+        print(f"DEBUG: ESP32 DATA ERROR: {str(e)}")
+        if db:
+            db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if db:
+            db.close()
 
 
 if __name__ == "__main__":
