@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ ADD THIS
 import Sidebar from "../component/Sidebar";
 import "../styles/staff.css";
+import { API_BASE_URL } from "../config";
 
 export default function StaffManagement() {
   const [staff, setStaff] = useState([]);
@@ -12,7 +13,7 @@ export default function StaffManagement() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/staff")
+    fetch(`${API_BASE_URL}/api/staff`)
       .then((res) => res.json())
       .then((data) => setStaff(data))
       .catch((err) => console.error("Error fetching staff:", err));
@@ -63,7 +64,7 @@ const handleSubmit = async () => {
       return;
     }
     setLoading(true);
-    const res = await fetch("/api/staff", {
+    const res = await fetch(`${API_BASE_URL}/api/staff`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

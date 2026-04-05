@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../component/Sidebar";
 import "../styles/reports.css";
+import { API_BASE_URL } from "../config";
 
 import {
 BarChart,
@@ -35,27 +36,27 @@ async function loadReports() {
   try {
 
     // DAILY CLEANINGS
-    const cleanings = await fetch("/api/report/cleanings");
+    const cleanings = await fetch(`${API_BASE_URL}/api/report/cleanings`);
     const cleaningsData = await cleanings.json();
     setCleaningData(cleaningsData || []);
 
     // PIE DATA
-    const types = await fetch("/api/report/types");
+    const types = await fetch(`${API_BASE_URL}/api/report/types`);
     const typesData = await types.json();
     setPieData(typesData || []);
 
     // TOP STAFF
-    const staff = await fetch("/api/report/top-staff");
+    const staff = await fetch(`${API_BASE_URL}/api/report/top-staff`);
     const staffData = await staff.json();
     setPerformers(staffData || []);
 
     // RECENT LOGS
-    const logsRes = await fetch("/api/report/logs");
+    const logsRes = await fetch(`${API_BASE_URL}/api/report/logs`);
     const logsData = await logsRes.json();
     setLogs(logsData || []);
 
     // SUMMARY
-    const summaryRes = await fetch("/api/report/summary");
+    const summaryRes = await fetch(`${API_BASE_URL}/api/report/summary`);
     const summaryData = await summaryRes.json();
 
     setSummary({

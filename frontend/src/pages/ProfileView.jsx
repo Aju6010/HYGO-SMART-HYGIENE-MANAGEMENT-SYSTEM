@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import "../styles/Combined.css";
 import userImg from '../img_vid/user_photo.jpg';
+import { API_BASE_URL } from "../config";
 
 const ProfileView = () => {
 
@@ -10,7 +11,7 @@ const ProfileView = () => {
 
     const staffId = localStorage.getItem("staff_id");
 
-fetch(`/api/staff/profile/${staffId}`)
+fetch(`${API_BASE_URL}/api/staff/profile/${staffId}`)
     .then(res=>res.json())
     .then(data=>{
       setProfile(data);

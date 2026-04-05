@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 export default function AddStaff() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function AddStaff() {
     e.preventDefault();
 
     try {
-      const res = await fetch("/api/staff", {
+      const res = await fetch(`${API_BASE_URL}/api/staff`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "../styles/CleaningLogs.css";
+import { API_BASE_URL } from "../config";
 
 const CleaningLogs = () => {
 
@@ -8,7 +9,7 @@ const CleaningLogs = () => {
 
   const fetchLogs = () => {
 
-    fetch("/api/report/logs")
+    fetch(`${API_BASE_URL}/api/report/logs`)
       .then(res => res.json())
       .then(data => {
 

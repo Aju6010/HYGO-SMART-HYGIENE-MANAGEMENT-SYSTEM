@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../component/Sidebar";
 import "../styles/alert.css";
+import { API_BASE_URL } from "../config";
 
 export default function AlertsFeedback() {
   const [activeTab, setActiveTab] = useState("alerts");
@@ -25,7 +26,7 @@ export default function AlertsFeedback() {
 
   const loadData = async () => {
     try {
-      const alertRes = await fetch("/api/alerts");
+      const alertRes = await fetch(`${API_BASE_URL}/api/alerts`);
       const alertData = await alertRes.json();
       setAlerts(alertData || []);
     } catch (error) {
@@ -33,7 +34,7 @@ export default function AlertsFeedback() {
     }
 
     try {
-      const feedbackRes = await fetch("/api/feedback");
+      const feedbackRes = await fetch(`${API_BASE_URL}/api/feedback`);
       const feedbackData = await feedbackRes.json();
       setFeedback(feedbackData || []);
     } catch (error) {
@@ -41,7 +42,7 @@ export default function AlertsFeedback() {
     }
 
     try {
-      const staffRes = await fetch("/api/staff");
+      const staffRes = await fetch(`${API_BASE_URL}/api/staff`);
       const staffData = await staffRes.json();
       setStaff(staffData || []);
     } catch (error) {
@@ -57,7 +58,7 @@ export default function AlertsFeedback() {
     if (!selectedStaff) return alert("Please select a staff member");
 
     try {
-      const response = await fetch(`/api/alerts/${alertId}/assign`, {
+      const response = await fetch(`${API_BASE_URL}/api/alerts/${alertId}/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -79,7 +80,7 @@ export default function AlertsFeedback() {
   const handleCreateAlert = async () => {
     if (!newAlert.toilet || !newAlert.message) return;
     try {
-      await fetch("/api/alerts", {
+      await fetch(`${API_BASE_URL}/api/alerts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAlert),

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "../styles/DashboardCards.css";
+import { API_BASE_URL } from "../config";
 
 const DashboardCards = () => {
 
@@ -16,8 +17,8 @@ const DashboardCards = () => {
 
       try {
 
-        const toiletsRes = await fetch("/api/toilets");
-        const alertsRes = await fetch("/api/alerts");
+        const toiletsRes = await fetch(`${API_BASE_URL}/api/toilets`);
+        const alertsRes = await fetch(`${API_BASE_URL}/api/alerts`);
 
         if (!toiletsRes.ok || !alertsRes.ok) {
           throw new Error("API error");

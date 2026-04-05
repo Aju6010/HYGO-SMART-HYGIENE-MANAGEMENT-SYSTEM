@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "../styles/AssignedTasks.css";
+import { API_BASE_URL } from "../config";
 
 const AssignedTasks = () => {
 
@@ -10,7 +11,7 @@ const AssignedTasks = () => {
 
     const staffId = localStorage.getItem("staff_id");
 
-fetch(`/api/staff/assigned-tasks/${staffId}`)
+fetch(`${API_BASE_URL}/api/staff/assigned-tasks/${staffId}`)
 
       .then((res) => {
 

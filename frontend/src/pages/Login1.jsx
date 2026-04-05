@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "../styles/log.css";
 import mopLogo from "../img_vid/mop_hygo1.png";
+import { API_BASE_URL } from "../config";
 
 export default function Login() {
 
@@ -18,7 +19,7 @@ const password = e.target.password.value;
 
 try {
 
-  const res = await fetch("/api/login", {
+  const res = await fetch(`${API_BASE_URL}/api/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

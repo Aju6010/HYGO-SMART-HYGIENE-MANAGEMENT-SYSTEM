@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../component/Sidebar";
 import "../styles/toilet.css";
+import { API_BASE_URL } from "../config";
 
 export default function ToiletStatus() {
   const [toilets, setToilets] = useState([]);
 
   useEffect(() => {
-    fetch("/api/toilets")
+    fetch(`${API_BASE_URL}/api/toilets`)
       .then((res) => res.json())
       .then((data) => setToilets(data))
       .catch((err) => console.error("Error fetching toilets:", err));
@@ -51,7 +52,7 @@ export default function ToiletStatus() {
       return;
     }
 
-    const res = await fetch("/api/toilets", {
+    const res = await fetch(`${API_BASE_URL}/api/toilets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

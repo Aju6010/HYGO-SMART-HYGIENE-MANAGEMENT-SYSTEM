@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "../styles/Complaints.css";
+import { API_BASE_URL } from "../config";
 
 const Complaints = () => {
 
@@ -11,7 +12,7 @@ const Complaints = () => {
 
   const fetchComplaints = () => {
 
-    fetch("/api/complaints")
+    fetch(`${API_BASE_URL}/api/complaints`)
       .then(res => res.json())
       .then(data => {
         setRecentComplaints(data);
@@ -46,7 +47,7 @@ const Complaints = () => {
     }
 
     const staffId = localStorage.getItem("staff_id");
-    fetch("/api/complaints", {
+    fetch(`${API_BASE_URL}/api/complaints`, {
 
       method: "POST",
 

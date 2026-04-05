@@ -4,6 +4,7 @@ import Sidebar from "../component/Sidebar";
 import "../styles/dash.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 function Dashboard() {
 
@@ -16,17 +17,17 @@ function Dashboard() {
  const fetchData = ( ) => { 
      console.log("REFRESH CLICKED");  
   // Alerts
-  fetch("/api/cleaning-alerts")
+  fetch(`${API_BASE_URL}/api/cleaning-alerts`)
     .then(res => res.json())
     .then(data => setAlerts(data));
 
   // Toilets
-  fetch("/api/toilets")
+  fetch(`${API_BASE_URL}/api/toilets`)
     .then(res => res.json())
     .then(data => setToilets(data));
 
     //  (AI prediction)
-  fetch("/api/predict-from-db")
+  fetch(`${API_BASE_URL}/api/predict-from-db`)
     .then(res => res.json())
     .then(data => setPredictions(data))
     .catch(err => console.log("Prediction error:", err));

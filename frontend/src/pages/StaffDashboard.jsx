@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 import ProfileView from './ProfileView';
 import CleaningLogs from './CleaningLogs';
@@ -41,7 +42,7 @@ const StaffDashboard = () => {
 
     try {
 
-      const res = await fetch("/api/report/summary");
+      const res = await fetch(`${API_BASE_URL}/api/report/summary`);
 
       if (!res.ok) {
         throw new Error("API error");
@@ -74,7 +75,7 @@ const StaffDashboard = () => {
 
   const staffId = localStorage.getItem("staff_id");
 
-  fetch(`/api/staff/profile/${staffId}`)
+  fetch(`${API_BASE_URL}/api/staff/profile/${staffId}`)
     .then(res => res.json())
     .then(data => {
       if (data && data.name) {
