@@ -60,16 +60,16 @@ export default function Sidebar() {
         Reports
       </NavLink>
 
-      <button 
+      <button
         onClick={handleLogout}
-        className="nav-btn" 
-        style={{ 
-          width: "100%", 
-          textAlign: "left", 
-          border: "none", 
-          background: "none", 
-          cursor: "pointer", 
-          color: "#ef4444", 
+        className="nav-btn"
+        style={{
+          width: "100%",
+          textAlign: "left",
+          border: "none",
+          background: "none",
+          cursor: "pointer",
+          color: "#ef4444",
           fontWeight: "bold",
           marginTop: "20px",
           padding: "10px 16px"

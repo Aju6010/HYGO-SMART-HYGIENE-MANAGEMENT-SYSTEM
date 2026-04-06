@@ -1,4 +1,4 @@
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import Sidebar from "../component/Sidebar";
 import "../styles/dash.css";
@@ -7,93 +7,117 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 
 function Dashboard() {
-
+  const navigate = useNavigate();
   const [alerts, setAlerts] = useState([]);
   const [toilets, setToilets] = useState([]);
   const [predictions, setPredictions] = useState([]);
-  const [toiletData, setToiletData] = useState([]); 
+  const [toiletData, setToiletData] = useState([]);
 
 
- const fetchData = ( ) => { 
-     console.log("REFRESH CLICKED");  
-  // Alerts
-  fetch(`${API_BASE_URL}/api/cleaning-alerts`)
-    .then(res => res.json())
-    .then(data => setAlerts(data));
+  const fetchData = () => {
+    console.log("REFRESH CLICKED");
+    // Alerts
+    fetch(`${API_BASE_URL}/api/alerts`)
+      .then(res => res.json())
+      .then(data => setAlerts(data));
 
-  // Toilets
-  fetch(`${API_BASE_URL}/api/toilets`)
-    .then(res => res.json())
-    .then(data => setToilets(data));
+    // Toilets
+    fetch(`${API_BASE_URL}/api/toilets`)
+      .then(res => res.json())
+      .then(data => setToilets(data));
 
     //  (AI prediction)
-  fetch(`${API_BASE_URL}/api/predict-from-db`)
-    .then(res => res.json())
-    .then(data => setPredictions(data))
-    .catch(err => console.log("Prediction error:", err));
- };  
+    fetch(`${API_BASE_URL}/api/predict-from-db`)
+      .then(res => res.json())
+      .then(data => setPredictions(data))
+      .catch(err => console.log("Prediction error:", err));
+  };
 
   // 🔗 Fetch alerts from Flask (DB)
   useEffect(() => {
     fetchData();
   }, [])
 
-// ===== KPI CALCULATIONS =====
-const total = toilets.length;
-// Dirty = Sensor alerts (High Odour / Urgent)
-const dirty = alerts.filter(a => a.type === "HIGH_ODOUR" || a.type === "URGENT_CLEANING").length;
-// Needs Attention = Maintenance alerts (Not Cleaned / High Usage)
-const needsAttention = alerts.filter(a => a.type === "NOT_CLEANED" || a.type === "HIGH_USAGE" || a.type === "MODERATE_ODOUR").length;
-// Clean = Everything else
-const clean = total - (dirty + needsAttention);
-const resolved = 0; // Coming from cleaning_log soon
+  // ===== KPI CALCULATIONS (Synchronized with Toilet Status page) =====
+  const total = toilets.length;
+  // Dirty = Toilets marked as 'dirty'
+  const dirty = toilets.filter(t => t.status === "dirty").length;
+  // Needs Attention = Toilets marked as 'needs cleaning' or 'maintenance'
+  const needsAttention = toilets.filter(t => t.status === "needs cleaning" || t.status === "maintenance").length;
+  // Clean = Toilets marked as 'clean'
+  const clean = toilets.filter(t => t.status === "clean").length;
+  const resolved = 0; // Coming from cleaning_log soon
 
 
-// ===== DYNAMIC DATA =====
+  // ===== DYNAMIC DATA =====
 
-// Labels
-const labels = predictions.map(t => `T${t.toilet_id}`);
+  // Labels
+  const labels = predictions.map(t => `T${t.toilet_id}`);
 
-// Data
-const usageData = predictions.map(t => t.usage_count || 0);
+  // Data
+  const usageData = predictions.map(t => t.usage_count || 0);
+  const cleanlinessData = predictions.map(t => t.cleanliness_score || 0);
 
-const cleanlinessData = predictions.map(t => t.cleanliness_score || 0);
+  // ✅ MODERN COLOR PALETTE
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Usage Count",
+        data: usageData,
+        backgroundColor: "#10b981", // Emerald
+        borderRadius: 8,
+        barThickness: 30,
+      },
+      {
+        label: "Cleanliness Score",
+        data: cleanlinessData,
+        backgroundColor: "#1e293b", // Slate
+        borderRadius: 8,
+        barThickness: 30,
+      },
+    ],
+  };
 
-// ✅ ONLY ONE data object
-const data = {
-  labels,
-  datasets: [
-    {
-      label: "Usage Count",
-      data: usageData,
-      backgroundColor: "#3DDC84",
+  // ===== DOUGHNUT CHART (Renamed from Pie) =====
+  const cleanCount = predictions.filter(t => t.status.toLowerCase() === "clean").length;
+  const moderateCount = predictions.filter(t => t.status.toLowerCase() === "moderate").length;
+  const dirtyCount = predictions.filter(t => t.status.toLowerCase() === "dirty" || t.status.toLowerCase() === "dirty soon").length;
+  const pendingCount = predictions.filter(t => t.status.toLowerCase() === "data pending").length;
+
+  const donutData = {
+    labels: ["Clean", "Moderate", "Dirty", "Pending"],
+    datasets: [
+      {
+        data: [cleanCount, moderateCount, dirtyCount, pendingCount],
+        backgroundColor: ["#10b981", "#fbbf24", "#ef4444", "#94a3b8"],
+        hoverOffset: 15,
+        cutout: '72%',
+        borderRadius: 6,
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, font: { size: 12, weight: '500' } } },
+      tooltip: { backgroundColor: '#1e293b', padding: 12, cornerRadius: 8 },
     },
-    {
-      label: "Cleanliness Score",
-      data: cleanlinessData,
-      backgroundColor: "#0F2027",
-    },
-  ],
-};
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 12, weight: '500' } } },
+      y: { grid: { color: '#f1f5f9' }, min: 0 }
+    }
+  };
 
-// ✅ Correct console log
-console.log("API DATA:", toilets);
-
-// ===== PIE CHART =====
-const cleanCount = predictions.filter(t => t.status.toLowerCase() === "clean").length;
-const moderateCount = predictions.filter(t => t.status.toLowerCase() === "moderate").length;
-const dirtyCount = predictions.filter(t => t.status.toLowerCase() === "dirty" || t.status.toLowerCase() === "dirty soon").length;
-const pendingCount = predictions.filter(t => t.status.toLowerCase() === "data pending").length;
-
-const pieData = {
-  labels: ["Clean", "Moderate", "Dirty", "Pending"],
-  datasets: [
-    {
-      data: [cleanCount, moderateCount, dirtyCount, pendingCount],
-      backgroundColor: ["#38bdf8", "#facc15", "#f87171", "#cbd5e1"],
-    },
-  ],
-};
+  const donutOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'right', labels: { usePointStyle: true, padding: 20, font: { size: 12, weight: '500' } } },
+      tooltip: { backgroundColor: '#1e293b', padding: 12, cornerRadius: 8 },
+    }
+  };
 
 
   return (
@@ -107,9 +131,9 @@ const pieData = {
             <h1>Dashboard</h1>
             <p>Monitor and manage hygiene across all facilities</p>
           </div>
-          
+
           <button className="refresh-btn"
-          onClick={fetchData}>
+            onClick={fetchData}>
             ⟳ Refresh Data
           </button>
         </div>
@@ -155,81 +179,92 @@ const pieData = {
 
         </div>
 
-        {/* CHART SECTION */}
-        <div className="section">
-          <h3>Usage & Cleanliness Analytics</h3>
+        {/* ANALYTICS SECTION — ENHANCED AESTHETICS */}
+        <div className="section modern-analytics">
+          <h3 style={{ fontSize: '1.2rem', color: '#1e293b' }}>Usage & Cleanliness Analytics</h3>
 
           <div className="charts-row">
-            <div className="chart bar-chart">
-              <Bar data={data} />
+            <div className="chart bar-chart-container">
+              <Bar data={data} options={chartOptions} />
             </div>
 
-            <div className="chart pie-chart">
-              <Pie data={pieData} />
+            <div className="chart donut-chart-container">
+              <Doughnut data={donutData} options={donutOptions} />
             </div>
           </div>
         </div>
 
-        {/* ALERTS SECTION — FROM DATABASE */}
-        <div className="alerts-section">
-          <h3>Active Alerts</h3>
+        {/* ALERTS SECTION — RE-DESIGNED PER MOCKUP */}
+        <div className="alerts-section" style={{ margin: '30px 0' }}>
+          <div className="section-header-row">
+            <h3 style={{ margin: 0 }}>Active Alerts</h3>
+            <span className="view-all-link" onClick={() => navigate('/alerts')}>
+              View All &gt;
+            </span>
+          </div>
 
           {alerts.length === 0 && (
-            <p style={{ color: "green" }}>
+            <p style={{ color: "green", padding: '10px' }}>
               No alerts. All toilets are clean ✅
             </p>
           )}
 
           <div className="alerts-list">
             {alerts.map((alert, index) => (
-              <div key={index} className="alert-card critical">
-                <div className="alert-left">
-                  <strong>Toilet {alert.toilet_id}</strong>
-                  <p>{alert.message}</p>
+              <div key={index} className="alert-item-card">
+                <div className="alert-card-top">
+                  <div className="alert-card-id-row">
+                    <span className="alert-dot"></span>
+                    <span className="alert-toilet-id">{alert.id}</span>
+                    <span className={`severity-badge ${alert.severity?.toLowerCase()}`}>
+                      {alert.severity}
+                    </span>
+                  </div>
+                  <span className="alert-warning-icon">⚠️</span>
                 </div>
 
-                <div className="alert-right">
-                  <span>{alert.location}</span>
+                <div className="alert-card-body">
+                  <p className="alert-message">{alert.message}</p>
+                  <span className="alert-timestamp">{alert.time}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
         <div className="section">
-  <h3>AI Cleaning Predictions</h3>
+          <h3>AI Cleaning Predictions</h3>
 
-  {predictions.length === 0 && (
-    <p>No predictions available</p>
-  )}
+          {predictions.length === 0 && (
+            <p>No predictions available</p>
+          )}
 
-  <div className="alerts-list">
-    {predictions.map((item, index) => (
+          <div className="alerts-list">
+            {predictions.map((item, index) => (
 
-      <div 
-         key={index} 
-         className={`alert-card ${
-          item.status.toLowerCase() === "dirty" || item.status.toLowerCase() === "dirty soon" ? 
-          "critical" : 
-          item.status.toLowerCase() === "moderate" ? 
-          "warning" : 
-          item.status.toLowerCase() === "data pending" ?
-          "pending" :
-            "safe"}`}>
+              <div
+                key={index}
+                className={`alert-card ${item.status.toLowerCase() === "dirty" || item.status.toLowerCase() === "dirty soon" ?
+                  "critical" :
+                  item.status.toLowerCase() === "moderate" ?
+                    "warning" :
+                    item.status.toLowerCase() === "data pending" ?
+                      "pending" :
+                      "safe"}`}>
 
-        <div className="alert-left">
-          <strong>Toilet {item.toilet_id}</strong>
-          <p>{item.status === "data pending" ? "Waiting for sensor check-in..." : `Next cleaning in ${item.predicted_minutes} mins`}</p>
+                <div className="alert-left">
+                  <strong>Toilet {item.toilet_id}</strong>
+                  <p>{item.status === "data pending" ? "Waiting for sensor check-in..." : `Next cleaning in ${item.predicted_minutes} mins`}</p>
+                </div>
+
+                <div className="alert-right">
+                  <span>{item.status}</span>
+                </div>
+
+              </div>
+
+            ))}
+          </div>
         </div>
-
-        <div className="alert-right">
-          <span>{item.status}</span>
-        </div>
-
-      </div>
-
-    ))}
-  </div>
-</div>
 
       </div>
     </div>

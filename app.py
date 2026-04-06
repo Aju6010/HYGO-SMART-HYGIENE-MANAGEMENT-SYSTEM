@@ -535,46 +535,62 @@ def get_reports():
 @app.route("/api/report/summary")
 def report_summary():
 
+    staff_id = request.args.get("staff_id")
     db, cursor = get_cursor()
 
-    cursor.execute("""
-        SELECT COUNT(*) AS total
-        FROM cleaning_log
-        WHERE cleaned_time IS NOT NULL
-    """)
+    try:
+        # Define the base filters
+        where_clause = "WHERE cleaned_time IS NOT NULL"
+        params = []
+        if staff_id and staff_id != "undefined":
+            where_clause += " AND staff_id = %s"
+            params.append(staff_id)
 
-    total = cursor.fetchone()["total"]
+        # Total cleanings
+        cursor.execute(f"SELECT COUNT(*) AS total FROM cleaning_log {where_clause}", tuple(params))
+        total = cursor.fetchone()["total"]
 
-    cursor.execute("""
-        SELECT AVG(TIMESTAMPDIFF(MINUTE, assigned_time, cleaned_time)) AS avg_time
-        FROM cleaning_log
-        WHERE cleaned_time IS NOT NULL
-    """)
+        # Avg duration
+        cursor.execute(f"SELECT AVG(TIMESTAMPDIFF(MINUTE, assigned_time, cleaned_time)) AS avg_time FROM cleaning_log {where_clause}", tuple(params))
+        avg = cursor.fetchone()["avg_time"] or 0
 
-    avg = cursor.fetchone()["avg_time"] or 0
+        # Verification rate → NOW Cleanliness Performance Index (Average Score)
+        rate_where = ""
+        rate_params = []
+        if staff_id and staff_id != "undefined":
+            rate_where = "WHERE staff_id = %s"
+            rate_params.append(staff_id)
 
-    cursor.execute("""
-        SELECT
-        (SUM(CASE WHEN verification_status='Verified' THEN 1 ELSE 0 END)/COUNT(*))*100 AS rate
-        FROM cleaning_log
-    """)
+        # We only average scores for 'Verified' tasks where a score was recorded
+        cursor.execute(f"""
+            SELECT 
+            COALESCE(AVG(cleanliness_score), 0) AS rate 
+            FROM cleaning_log 
+            {rate_where}
+            {" AND " if rate_where else "WHERE "} verification_status = 'Verified'
+        """, tuple(rate_params))
 
-    rate = cursor.fetchone()["rate"] or 0
+        rate = cursor.fetchone()["rate"] or 0
 
-    cursor.execute("""
-        SELECT COUNT(*) AS resolved
-        FROM cleaning_log
-        WHERE verification_status='Verified'
-    """)
+        # Resolved count
+        res_where = "WHERE verification_status='Verified'"
+        res_params = []
+        if staff_id and staff_id != "undefined":
+            res_where += " AND staff_id = %s"
+            res_params.append(staff_id)
+        
+        cursor.execute(f"SELECT COUNT(*) AS resolved FROM cleaning_log {res_where}", tuple(res_params))
+        resolved = cursor.fetchone()["resolved"]
 
-    resolved = cursor.fetchone()["resolved"]
-
-    return jsonify({
-        "total_cleanings": total,
-        "avg_duration": str(round(avg)) + " min",
-        "verification_rate": str(round(rate)) + "%",
-        "alerts_resolved": resolved
-    })
+        return jsonify({
+            "total_cleanings": total,
+            "avg_duration": str(round(avg)) + " min",
+            "verification_rate": str(round(rate)) + "%",
+            "alerts_resolved": resolved
+        })
+    finally:
+        if db:
+            db.close()
 
 
 # --------------------
@@ -928,16 +944,32 @@ def receive_sensor_data():
             
             if pending_log:
                 log_id = pending_log["log_id"]
-                print(f"✅ AUTO-VERIFY: Closing Log #{log_id} for T-{toilet_id}")
+                
+                # Calculate cleanliness score for trust index
+                # 0.0 - 0.5 -> 100%
+                # 0.5 - 1.2 -> 90%
+                # 1.2 - 2.0 -> 60%
+                # > 2.0 -> 30%
+                if odour_level <= 0.5:
+                    perf_score = 100
+                elif odour_level <= 1.2:
+                    perf_score = 90
+                elif odour_level <= 2.0:
+                    perf_score = 60
+                else:
+                    perf_score = 30
+
+                print(f"✅ AUTO-VERIFY: Closing Log #{log_id} for T-{toilet_id} with Score: {perf_score}")
                 
                 # Update Cleaning Log to 'Completed' and 'Verified'
                 cursor.execute("""
                     UPDATE cleaning_log 
                     SET attendance_status = 'Completed', 
                         verification_status = 'Verified', 
-                        cleaned_time = NOW() 
+                        cleaned_time = NOW(),
+                        cleanliness_score = %s 
                     WHERE log_id = %s
-                """, (log_id,))
+                """, (perf_score, log_id))
 
         db.commit()
         return jsonify({"message": "Data received and verified"}), 200

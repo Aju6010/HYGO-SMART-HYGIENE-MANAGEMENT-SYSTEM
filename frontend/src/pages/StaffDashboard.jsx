@@ -6,9 +6,9 @@ import ProfileView from './ProfileView';
 import CleaningLogs from './CleaningLogs';
 import AssignedTasks from './AssignedTasks';
 import Complaints from './Complaints';
-import DashboardCards from './DashboardCards';
 
 import "../styles/Combined.css";
+import "../styles/dash.css";
 
 const StaffDashboard = () => {
 
@@ -17,6 +17,8 @@ const StaffDashboard = () => {
 
   const [trustScore, setTrustScore] = useState(0);
   const [staffname, setStaffName] = useState('');
+  const [alerts, setAlerts] = useState([]);
+  const [toilets, setToilets] = useState([]);
 
   const radius = 60;
   const circumference = Math.PI * radius;
@@ -39,54 +41,66 @@ const StaffDashboard = () => {
 
 
   const fetchTrustScore = async () => {
-
     try {
-
-      const res = await fetch(`${API_BASE_URL}/api/report/summary`);
-
+      const staffId = localStorage.getItem("staff_id");
+      const res = await fetch(`${API_BASE_URL}/api/report/summary?staff_id=${staffId}`);
       if (!res.ok) {
         throw new Error("API error");
       }
-
       const data = await res.json();
-
       let score = 0;
-
       if (data.verification_rate) {
-
         score = parseInt(data.verification_rate);
-
       }
-
       setTrustScore(score);
-
     } catch (err) {
-
       console.log("Trust score error:", err);
-
     }
+  };
 
+
+  const fetchData = () => {
+    // Alerts
+    fetch(`${API_BASE_URL}/api/cleaning-alerts`)
+      .then(res => res.json())
+      .then(data => setAlerts(data));
+
+    // Toilets
+    fetch(`${API_BASE_URL}/api/toilets`)
+      .then(res => res.json())
+      .then(data => setToilets(data));
+
+    fetchTrustScore();
+
+    const staffId = localStorage.getItem("staff_id");
+
+    fetch(`${API_BASE_URL}/api/staff/profile/${staffId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name) {
+          setStaffName(data.name);
+        }
+      })
+      .catch(err => {
+        console.log("Profile fetch error:", err);
+      });
   };
 
 
   useEffect(() => {
 
-  fetchTrustScore();
+    fetchData();
 
-  const staffId = localStorage.getItem("staff_id");
+  }, []);
 
-  fetch(`${API_BASE_URL}/api/staff/profile/${staffId}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.name) {
-        setStaffName(data.name);
-      }
-    })
-    .catch(err => {
-      console.log("Profile fetch error:", err);
-    });
-
-}, []);
+  // ===== KPI CALCULATIONS (Matches Admin Dashboard) =====
+  const total = toilets.length;
+  // Dirty = Sensor alerts (High Odour / Urgent)
+  const dirty = alerts.filter(a => a.type === "HIGH_ODOUR" || a.type === "URGENT_CLEANING").length;
+  // Needs Attention = Maintenance alerts (Not Cleaned / High Usage)
+  const needsAttention = alerts.filter(a => a.type === "NOT_CLEANED" || a.type === "HIGH_USAGE" || a.type === "MODERATE_ODOUR").length;
+  // Clean = Everything else
+  const clean = total - (dirty + needsAttention);
 
 
 
@@ -152,10 +166,10 @@ const StaffDashboard = () => {
           <h1>
 
             {activeTab === 'profile' ? 'User Profile' :
-            activeTab === 'cleaning-logs' ? 'Cleaning Maintenance Logs' :
-            activeTab === 'assigned-tasks' ? 'Tasks from Authority' :
-            activeTab === 'complaints' ? 'File a Complaint' :
-            'Staff Overview'}
+              activeTab === 'cleaning-logs' ? 'Cleaning Maintenance Logs' :
+                activeTab === 'assigned-tasks' ? 'Tasks from Authority' :
+                  activeTab === 'complaints' ? 'File a Complaint' :
+                    'Staff Overview'}
 
           </h1>
 
@@ -264,7 +278,7 @@ const StaffDashboard = () => {
                     </span>
 
                     <span className="gauge-text">
-                      Trust Index
+                      Performance Index
                     </span>
 
                   </div>
@@ -276,7 +290,72 @@ const StaffDashboard = () => {
 
               <div className="dashboard-metrics-section">
 
-                <DashboardCards />
+                {/* KPI CARDS — IDENTICAL TO ADMIN DASHBOARD */}
+                <div className="cards" style={{ padding: '0 0 20px 0' }}>
+
+                  <div className="card card-blue">
+                    <div className="card-content">
+                      <p className="card-title">Total Toilets</p>
+                      <h2>{total}</h2>
+                      <span className="card-sub">All facilities</span>
+                    </div>
+                    <div className="card-icon blue">🚿</div>
+                  </div>
+
+                  <div className="card card-green">
+                    <div className="card-content">
+                      <p className="card-title">Clean Toilets</p>
+                      <h2>{clean}</h2>
+                      <span className="card-sub up">+5% today</span>
+                    </div>
+                    <div className="card-icon green">✨</div>
+                  </div>
+
+                  <div className="card card-red">
+                    <div className="card-content">
+                      <p className="card-title">Dirty Toilets</p>
+                      <h2>{dirty}</h2>
+                      <span className="card-sub danger">Action required</span>
+                    </div>
+                    <div className="card-icon red">💧</div>
+                  </div>
+
+                  <div className="card card-yellow">
+                    <div className="card-content">
+                      <p className="card-title">Needs Attention</p>
+                      <h2>{needsAttention}</h2>
+                      <span className="card-sub">Overdue cleaning</span>
+                    </div>
+                    <div className="card-icon yellow">⚠️</div>
+                  </div>
+
+                </div>
+
+                {/* ALERTS SECTION — IDENTICAL TO ADMIN DASHBOARD */}
+                <div className="alerts-section" style={{ margin: '20px 0' }}>
+                  <h3 style={{ marginBottom: '15px' }}>Active Alerts</h3>
+
+                  {alerts.length === 0 && (
+                    <p style={{ color: "green" }}>
+                      No alerts. All toilets are clean ✅
+                    </p>
+                  )}
+
+                  <div className="alerts-list">
+                    {alerts.map((alert, index) => (
+                      <div key={index} className="alert-card critical">
+                        <div className="alert-left">
+                          <strong>Toilet {alert.toilet_id}</strong>
+                          <p>{alert.message}</p>
+                        </div>
+
+                        <div className="alert-right">
+                          <span>{alert.location}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
               </div>
 

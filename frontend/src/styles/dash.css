@@ -309,15 +309,27 @@ html,body {
 
 .chart {
   background: white;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.3s ease;
 }
-.chart.bar-chart {
-  flex: 2;    /* takes more space */
+
+.chart:hover {
+  transform: translateY(-4px);
 }
-.chart.pie-chart {
-  flex: 1;    /* takes remaining space */
+
+.chart.bar-chart-container {
+  flex: 1.8;    /* took more space */
+}
+
+.chart.donut-chart-container {
+  flex: 1.2;    /* took remaining space */
+}
+
+.modern-analytics {
+  margin-top: 40px;
 }
 
 /* AI Prediction Colors */
@@ -336,6 +348,121 @@ html,body {
   background-color: #fee2e2;
   border-left: 6px solid #ef4444;
 }
+
+/* REDESIGNED ACTIVE ALERTS (ADMIN DASHBOARD) */
+
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.view-all-link {
+  color: #0d9488;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+
+.view-all-link:hover {
+  opacity: 0.8;
+}
+
+.alert-item-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.alert-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.alert-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alert-card-id-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.alert-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.alert-toilet-id {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.1rem;
+}
+
+.severity-badge {
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+/* Severity Colors */
+.severity-badge.low {
+  background-color: #e0e7ff;
+  color: #4338ca;
+}
+
+.severity-badge.medium {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.severity-badge.critical, .severity-badge.high {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.alert-warning-icon {
+  font-size: 1.25rem;
+  color: #f59e0b;
+}
+
+.alert-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alert-message {
+  color: #475569;
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.alert-timestamp {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 
 
 
