@@ -7,8 +7,8 @@
   width: 100%;
 }
 
-.summary-card {
-  flex: 1 1 18% !important; /* Force items to take ~18% width */
+.toilet-summary .summary-card {
+  flex: 1 1 18% !important;
   max-width: 19% !important;
   min-width: 0 !important;
   background: white;
@@ -21,12 +21,12 @@
   text-align: center;
 }
 
-.summary-card span {
+.toilet-summary .summary-card span {
   font-size: 18px;
   margin-bottom: 4px;
 }
 
-.summary-card h2 {
+.toilet-summary .summary-card h2 {
   font-size: 22px;
   margin-bottom: 2px;
 }
