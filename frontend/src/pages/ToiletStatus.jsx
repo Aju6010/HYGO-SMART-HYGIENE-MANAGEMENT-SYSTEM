@@ -113,26 +113,31 @@ const filteredToilets = toilets.filter((t) => {
         {/* SUMMARY CARDS */}
         <div className="toilet-summary">
           <div className="summary-card clean">
+            <span>✨</span>
             <h2>{clean}</h2>
             <p>Clean</p>
           </div>
 
           <div className="summary-card needs-cleaning">
+            <span>⚠️</span>
             <h2>{needsCleaningCount}</h2>
             <p>Needs Cleaning</p>
           </div>
 
           <div className="summary-card dirty">
+            <span>💧</span>
             <h2>{dirty}</h2>
             <p>Dirty/Alert</p>
           </div>
 
           <div className="summary-card maintenance">
+            <span>🔧</span>
             <h2>{maintenance}</h2>
             <p>Maintenance</p>
           </div>
 
           <div className="summary-card offline">
+            <span>💤</span>
             <h2>{offline}</h2>
             <p>Offline</p>
           </div>
@@ -152,7 +157,7 @@ const filteredToilets = toilets.filter((t) => {
             return (
               <div className="toilet-card" key={t.toilet_id}>
                 <div className={`status-icon ${t.status}`}>
-                  {t.status === "clean" ? "✨" : t.status === "dirty" ? "💧" : t.status === "needs cleaning" ? "⏳" : "⚠️"}
+                  {t.status === "clean" ? "✨" : t.status === "dirty" ? "💧" : t.status === "needs cleaning" ? "⚠️" : t.status === "maintenance" ? "🔧" : "💤"}
                 </div>
 
                 <h3>T-{String(t.toilet_id).padStart(3, "0")}</h3>

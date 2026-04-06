@@ -231,37 +231,36 @@ function Dashboard() {
             ))}
           </div>
         </div>
-        <div className="section">
-          <h3>AI Cleaning Predictions</h3>
+        <div className="section modern-predictions" style={{ marginTop: '30px' }}>
+          <h3 style={{ fontSize: '1.2rem', color: '#1e293b' }}>AI Cleaning Predictions</h3>
 
           {predictions.length === 0 && (
-            <p>No predictions available</p>
+            <p style={{ padding: '10px' }}>No predictions available</p>
           )}
 
           <div className="alerts-list">
             {predictions.map((item, index) => (
-
-              <div
-                key={index}
-                className={`alert-card ${item.status.toLowerCase() === "dirty" || item.status.toLowerCase() === "dirty soon" ?
-                  "critical" :
-                  item.status.toLowerCase() === "moderate" ?
-                    "warning" :
-                    item.status.toLowerCase() === "data pending" ?
-                      "pending" :
-                      "safe"}`}>
-
-                <div className="alert-left">
-                  <strong>Toilet {item.toilet_id}</strong>
-                  <p>{item.status === "data pending" ? "Waiting for sensor check-in..." : `Next cleaning in ${item.predicted_minutes} mins`}</p>
+              <div key={index} className="alert-item-card">
+                <div className="alert-card-top">
+                  <div className="alert-card-id-row">
+                    <span className="alert-dot" style={{ backgroundColor: '#8b5cf6' }}></span>
+                    <span className="alert-toilet-id">T-{String(item.toilet_id).padStart(3, '0')}</span>
+                    <span className={`severity-badge ${item.status?.toLowerCase().replace(' ', '-')}`}>
+                      {item.status}
+                    </span>
+                  </div>
+                  <span className="alert-warning-icon">🕒</span>
                 </div>
 
-                <div className="alert-right">
-                  <span>{item.status}</span>
+                <div className="alert-card-body">
+                  <p className="alert-message">
+                    {item.status === "data pending" ? 
+                      "Waiting for next sensor reading..." : 
+                      `Hygo predicts next cleaning in ${item.predicted_minutes} minutes`}
+                  </p>
+                  <span className="alert-timestamp">AI Powered Forecast</span>
                 </div>
-
               </div>
-
             ))}
           </div>
         </div>

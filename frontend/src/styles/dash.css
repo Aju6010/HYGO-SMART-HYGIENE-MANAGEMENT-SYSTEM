@@ -434,9 +434,24 @@ html,body {
   color: #d97706;
 }
 
-.severity-badge.critical, .severity-badge.high {
+.severity-badge.critical, .severity-badge.high, .severity-badge.dirty, .severity-badge.dirty-soon {
   background-color: #fee2e2;
   color: #b91c1c;
+}
+
+.severity-badge.safe, .severity-badge.clean {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.severity-badge.data-pending, .severity-badge.pending {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.severity-badge.moderate, .severity-badge.warning {
+  background-color: #fef3c7;
+  color: #d97706;
 }
 
 .alert-warning-icon {
