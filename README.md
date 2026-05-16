@@ -18,3 +18,5 @@ for backend and MySQL for database management, the system ensures reliable data 
 real-time updates. Through effective implementation, the system enhances public hygiene, op
 timizes resource utilization, ensures timely maintenance, and improves overall user satisfaction,
 demonstrating the impact of IoT and AI-driven automation in modern sanitation management.
+
+Host : https://hygo-frontend.onrender.com/
