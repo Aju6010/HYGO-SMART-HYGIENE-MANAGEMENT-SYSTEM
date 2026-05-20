@@ -1,18 +1,39 @@
-.complaints-container {
-    display: flex;
-    justify-content: center;
-    padding: 20px;
+.complaints-page {
+    padding: 40px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
 }
 
-.complaints-card {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    width: 100%;
-    max-width: 650px;
-    border: 1px solid #f1f5f9;
+.page-title {
+    font-size: 2.2rem;
+    color: #0f172a;
+    margin-bottom: 30px;
+    font-weight: 800;
 }
+
+.complaints-container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+@media (max-width: 800px) {
+    .complaints-container {
+        flex-direction: column;
+    }
+}
+
+.complaints-card, .recent-complaints-card {
+    background: white;
+    padding: 35px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
+    flex: 1;
+    width: 100%;
+}
+
 
 .complaints-card h2 {
     color: #1e293b;
@@ -93,4 +114,75 @@
     border: none;
     border-radius: 6px;
     cursor: pointer;
+}
+
+/* Recent Complaints Styling */
+.recent-complaints-card h2 {
+    color: #1e293b;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f8fafc;
+    padding-bottom: 15px;
+}
+
+.complaints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.complaint-item {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid #cbd5e1;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.complaint-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.complaint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.category-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.category-badge.technical {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.category-badge.hygiene {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.category-badge.plumbing {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.complaint-date {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.complaint-desc {
+    color: #334155;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
 }

@@ -1,128 +1,97 @@
 import React, { useEffect, useState } from 'react';
 import "../styles/Combined.css";
-import userImg from '../img_vid/user_photo.jpg';
+import userImg from '../img_vid/user_photo.jpg'; // Placeholder 
 import { API_BASE_URL } from "../config";
 
 const ProfileView = () => {
+  const [profile, setProfile] = useState(null);
+  const [profilePhoto, setProfilePhoto] = useState(userImg);
 
-  const [profile,setProfile] = useState(null);
-
-  useEffect(()=>{
-
+  useEffect(() => {
     const staffId = localStorage.getItem("staff_id");
+    fetch(`${API_BASE_URL}/api/staff/profile/${staffId}`)
+      .then(res => res.json())
+      .then(data => {
+        setProfile(data);
+      })
+      .catch(err => {
+        console.log("Profile error:", err);
+      });
+  }, []);
 
-fetch(`${API_BASE_URL}/api/staff/profile/${staffId}`)
-    .then(res=>res.json())
-    .then(data=>{
-      setProfile(data);
-    })
-    .catch(err=>{
-      console.log("Profile error:",err);
-    });
+  // Handle photo upload
+  const handlePhotoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePhoto(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-  },[]);
-
-
-  if(!profile){
-    return <p style={{padding:"20px"}}>Loading profile...</p>;
+  if (!profile) {
+    return <p style={{ padding: "20px" }}>Loading profile...</p>;
   }
 
-
   return (
-
     <div className="profile-wrapper">
-
       <div className="profile-banner-top">
         <span>Profile View (HYGO HYGIENE MANAGEMENT SYSTEM)</span>
       </div>
 
       <div className="profile-card">
-
+        {/* Centered User Identity Section */}
         <div className="user-identity-centered">
-
           <div className="image-circle">
-            <img src={userImg} alt={profile.name}/>
+            <img src={profilePhoto} alt={profile.name} />
           </div>
-
-          <div className="user-label-blue">
-            {profile.name}
+          <div className="user-label-blue">{profile.name}</div>
+          
+          {/* Photo Upload Input */}
+          <div className="photo-upload-container">
+            <input
+              type="file"
+              id="photo-upload"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              style={{ display: 'none' }}
+            />
+            <button
+              className="upload-photo-btn"
+              onClick={() => document.getElementById('photo-upload').click()}
+            >
+              📤 Upload Photo
+            </button>
           </div>
-
         </div>
 
-
+        {/* Basic Details Section */}
         <div className="details-accordion">
-
           <div className="details-title">
             <span>▼ Basic details</span>
           </div>
-
+          
           <div className="details-grid">
-
             <div className="details-col">
-
-              <div className="data-row">
-                <span className="label">Gender</span>
-                <strong>{profile.gender}</strong>
-              </div>
-
-              <div className="data-row">
-                <span className="label">Date of Birth</span>
-                <strong>{profile.dob}</strong>
-              </div>
-
-              <div className="data-row">
-                <span className="label">Aadhar Number</span>
-                <strong>{profile.aadhar}</strong>
-              </div>
-
-              <div className="data-row">
-                <span className="label">Mother Tongue</span>
-                <strong>{profile.mother_tongue}</strong>
-              </div>
-
-              <div className="data-row">
-                <span className="label">Category</span>
-                <strong>{profile.category}</strong>
-              </div>
-
+              <div className="data-row"><span className="label">Gender</span> <strong>{profile.gender}</strong></div>
+              <div className="data-row"><span className="label">Date of Birth</span> <strong>{profile.dob}</strong></div>
+              <div className="data-row"><span className="label">Aadhar Number</span> <strong>{profile.aadhar}</strong></div>
+              <div className="data-row"><span className="label">Mother Tongue</span> <strong>{profile.mother_tongue}</strong></div>
+              <div className="data-row"><span className="label">Category</span> <strong>{profile.category}</strong></div>
             </div>
-
-
             <div className="details-col">
-
-              <div className="data-row">
-                <span className="label">Address</span>
-                <strong>{profile.address}</strong>
-              </div>
-
-              <div className="data-row">
-                <span className="label">Native</span>
-                <strong>{profile.native_place}</strong>
-              </div>
-
-              <div className="data-row">
-                <span className="label">Nationality</span>
-                <strong>{profile.nationality}</strong>
-              </div>
-
-              <div className="data-row">
-                <span className="label">Blood Group</span>
-                <strong>{profile.blood_group}</strong>
-              </div>
-
+              <div className="data-row"><span className="label">Address</span> <strong>{profile.address}</strong></div>
+              <div className="data-row"><span className="label">Native</span> <strong>{profile.native_place}</strong></div>
+              <div className="data-row"><span className="label">Nationality</span> <strong>{profile.nationality}</strong></div>
+              <div className="data-row"><span className="label">Blood Group</span> <strong>{profile.blood_group}</strong></div>
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 };
 
 export default ProfileView;
