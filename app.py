@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import cross_origin
 from flask_cors import CORS
@@ -25,11 +26,11 @@ CORS(app,resources={r"/api/*":{"origins":"*"}},
 # --------------------
 def get_db():
     return mysql.connector.connect(
-        host="crossover.proxy.rlwy.net",
-        user="root",
-        password="QLjtrYTSMVzNNhNRWJmoJHghylJOVzSi",  # from Railway
-        database="railway",
-        port=40219,
+        host=os.environ.get("MYSQLHOST", "centerbeam.proxy.rlwy.net"),
+        user=os.environ.get("MYSQLUSER", "root"),
+        password=os.environ.get("MYSQLPASSWORD", "tTKBKxEcBiSAzSZMEqGUMKZIuSFPCfOS"),
+        database=os.environ.get("MYSQLDATABASE", "railway"),
+        port=int(os.environ.get("MYSQLPORT", 26363)),
         autocommit=True
     )
 
@@ -985,4 +986,5 @@ def receive_sensor_data():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
