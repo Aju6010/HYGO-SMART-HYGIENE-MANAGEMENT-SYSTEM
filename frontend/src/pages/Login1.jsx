@@ -1,147 +1,128 @@
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "../styles/log.css";
 import mopLogo from "../img_vid/mop_hygo1.png";
 import { API_BASE_URL } from "../config";
+import adminIcon from "../img_vid/admin_hygo1.png";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const role = searchParams.get("role");
 
-const navigate = useNavigate();
-const [searchParams] = useSearchParams();
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const username = e.target.email.value;
+    const password = e.target.password.value;
 
-const role = searchParams.get("role");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
+      console.log("Response Status:", res.status);
 
-const handleLogin = async (e) => {
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Server Error Response:", errorText);
+        alert(`Login failed (Status ${res.status}). Please check credentials.`);
+        return;
+      }
 
-e.preventDefault();
+      const rawText = await res.text();
+      console.log("Raw Response Body:", rawText);
 
-const username = e.target.email.value;
-const password = e.target.password.value;
+      if (!rawText || rawText.trim() === "") {
+        console.error("Empty response received from server");
+        alert("Server error: Empty response. Please check if your backend is running.");
+        return;
+      }
 
-try {
+      const data = JSON.parse(rawText);
 
-  const res = await fetch(`${API_BASE_URL}/api/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      username: username,
-      password: password
-    })
-  });
-  console.log("Response Status:", res.status);
+      if (!data.success) {
+        alert(data.message || "Invalid username or password");
+        return;
+      }
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.error("Server Error Response:", errorText);
-    alert(`Login failed (Status ${res.status}). Please check credentials.`);
-    return;
-  }
+      // ADMIN LOGIN
+      if (data.role === "admin") {
+        navigate("/dashboard");
+      }
 
-  const rawText = await res.text();
-  console.log("Raw Response Body:", rawText);
+      // STAFF LOGIN
+      if (data.role === "staff") {
+        localStorage.setItem("staff_id", data.staff_id);
+        navigate("/staff-dashboard");
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Login failed");
+    }
+  };
 
-  if (!rawText || rawText.trim() === "") {
-    console.error("Empty response received from server");
-    alert("Server error: Empty response. Please check if your backend is running.");
-    return;
-  }
+  return (
+    <div className="login-page">
+      <div className="login-card">
+        <div className="logo-container">
+          <img 
+            src={role === "admin" ? adminIcon : mopLogo} 
+            alt={role === "admin" ? "Admin Logo" : "Mop Logo"} 
+            className="app-logo" 
+          />
+        </div>
 
-  const data = JSON.parse(rawText);
+        <h1>{role === "admin" ? "Admin Login" : "Staff Login"}</h1>
+        <p className="subtitle">
+          Please enter your details to sign in
+        </p>
 
-  if (!data.success) {
-    alert(data.message || "Invalid username or password");
-    return;
-  }
+        <form onSubmit={handleLogin}>
+          <input
+            type="text"
+            name="email"
+            placeholder="Username"
+            required
+          />
 
-  // ADMIN LOGIN
-  if (data.role === "admin") {
-    navigate("/dashboard");
-  }
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
 
-  // STAFF LOGIN
-  if (data.role === "staff") {
+          <div className="options">
+            <button
+              type="button"
+              className="link-btn"
+              onClick={() => alert("Forgot password coming soon")}
+            >
+              Forgot password?
+            </button>
+          </div>
 
-    localStorage.setItem("staff_id", data.staff_id);
+          <button type="submit" className="btn">
+            Sign in
+          </button>
+        </form>
 
-    navigate("/staff-dashboard");
-  }
-
-} catch (err) {
-
-  console.log(err);
-  alert("Login failed");
-
-}
-
-};
-
-return (
-
-<div className="login-page">
-
-  <div className="login-card">
-
-    <div className="logo-container">
-      <img src={mopLogo} alt="Company Logo" className="app-logo" />
-    </div>
-
-    <h1>{role === "admin" ? "Admin Login" : "Staff Login"}</h1>
-
-    <p className="subtitle">
-      Please enter your details to sign in
-    </p>
-
-    <form onSubmit={handleLogin}>
-
-      <input
-        type="text"
-        name="email"
-        placeholder="Username"
-        required
-      />
-
-      <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        required
-      />
-
-      <div className="options">
-
-        <button
-          type="button"
-          className="link-btn"
-          onClick={() => alert("Forgot password coming soon")}
-        >
-          Forgot password?
-        </button>
-
+        <div className="options">
+          <button
+            type="button"
+            className="link-btn"
+            onClick={() => navigate("/roles")}
+          >
+            ← Change Role
+          </button>
+        </div>
       </div>
-
-      <button type="submit" className="btn">
-        Sign in
-      </button>
-
-    </form>
-
-    <div className="options">
-
-      <button
-        type="button"
-        className="link-btn"
-        onClick={() => navigate("/roles")}
-      >
-        ← Change Role
-      </button>
-
     </div>
-
-  </div>
-
-</div>
-
-);
-
+  );
 }
