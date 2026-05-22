@@ -382,8 +382,16 @@ def get_alerts():
         FROM sensor_data s1
         JOIN toilet t ON s1.toilet_id = t.toilet_id
         LEFT JOIN staff st ON t.assigned_staff_id = st.staff_id
-        LEFT JOIN cleaning_log c ON s1.toilet_id = c.toilet_id 
-        AND c.cleaned_time IS NULL 
+        LEFT JOIN (
+            SELECT c1.*
+            FROM cleaning_log c1
+            JOIN (
+                SELECT toilet_id, MAX(log_id) AS max_log_id
+                FROM cleaning_log
+                WHERE cleaned_time IS NULL
+                GROUP BY toilet_id
+            ) c2 ON c1.log_id = c2.max_log_id
+        ) c ON s1.toilet_id = c.toilet_id 
 
         WHERE s1.timestamp = (
             SELECT MAX(timestamp)
